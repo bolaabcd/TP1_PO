@@ -21,11 +21,11 @@ class Solution
         mpq_t solval;
         void solve(Tableau &t);
         void canon(Tableau &t);
-        void ilim();
+        void ilim(int negvar, Tableau &t);
         void optim();
         std::vector<mpq_t> sol;
         std::vector<int> inv_cert;
-        std::vector<int> viab_cert;
+        std::vector<mpq_t> viab_cert;
         std::vector<int> basis;
 };
 

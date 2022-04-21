@@ -106,7 +106,7 @@ void Solution::solve(Tableau &t)
             }
 
             // if didn't find positive a, it's ilimited
-            this->ilim();
+            this->ilim(j, t);
             return;
         }
     // if didn't find positive c, it's already optimal
@@ -122,6 +122,23 @@ void Solution::canon(Tableau &t)
         // this may cause problems. Think about it later, if it's impossible to do it in some case.
         t.makeone(this->basis[i], i + 1);
     }
+}
+
+void Solution::ilim(int negvar, Tableau &t)
+{
+    this->infinite=true;
+    this->viab_cert.clear();
+    this->viab_cert.resize(t.m);
+
+    for(int i = 0; i < t.m; i++)
+        mpq_init(this->viab_cert[i]);
+
+    assert(this->basis.size() == this->sol.size());
+    for(int i = 0; i < this->basis.size(); i++)
+        mpq_set(this->viab_cert[this->basis[i]], this->sol[i]);
+    
+    assert(mpq_cmp_si(this->viab_cert[negvar],0,1));
+    mpq_set_si(this->viab_cert[negvar],1,1);
 }
 
 Solution::~Solution()
