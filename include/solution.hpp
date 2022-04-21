@@ -17,6 +17,7 @@ class Solution
         ~Solution();
     private:
         void solve(Tableau &t);
+        mpq_t solval;
         std::vector<mpq_t> sol;
         std::vector<int> cert;
         std::vector<int> basis;
