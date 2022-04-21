@@ -14,6 +14,7 @@ class Tableau
         int get_n();
         int get_m();
         ~Tableau();
+        friend Solution;
     private:
         int n;
         int m;
