@@ -14,6 +14,7 @@ class Solution
         bool is_zero();
         void print_yt(std::ostream &out);
         friend std::ostream &operator<<(std::ostream &os, Solution &s);
+        ~Solution();
     private:
         void solve(Tableau &t);
         std::vector<mpq_t> sol;
