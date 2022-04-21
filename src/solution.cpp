@@ -118,27 +118,37 @@ void Solution::canon(Tableau &t)
     assert(this->basis.size() == t.m);
     for (int i = 0; i < this->basis.size(); i++)
     {
-        // make this line and column be one by gaussian elimination
+        // make this line and column be one by gaussian elimination. viab_cert is used to update
+        // the optmality certification.
+        t.makeone(this->basis[i], i + 1, this->viab_cert);
         // this may cause problems. Think about it later, if it's impossible to do it in some case.
-        t.makeone(this->basis[i], i + 1);
     }
 }
 
 void Solution::ilim(int negvar, Tableau &t)
 {
-    this->infinite=true;
+    this->infinite = true;
     this->viab_cert.clear();
     this->viab_cert.resize(t.m);
 
-    for(int i = 0; i < t.m; i++)
+    for (int i = 0; i < t.m; i++)
         mpq_init(this->viab_cert[i]);
 
     assert(this->basis.size() == this->sol.size());
-    for(int i = 0; i < this->basis.size(); i++)
+    for (int i = 0; i < this->basis.size(); i++)
         mpq_set(this->viab_cert[this->basis[i]], this->sol[i]);
-    
-    assert(mpq_cmp_si(this->viab_cert[negvar],0,1));
-    mpq_set_si(this->viab_cert[negvar],1,1);
+
+    assert(mpq_cmp_si(this->viab_cert[negvar], 0, 1));
+    mpq_set_si(this->viab_cert[negvar], 1, 1);
+}
+
+void Solution::optim()
+{
+    this->infinite = false;
+    mpq_neg(this->solval,this->solval);
+    assert(this->viab_cert.size());
+    for(int i = 0; i < this->viab_cert.size(); i++)
+        mpq_neg(this->viab_cert[i],this->viab_cert[i]);
 }
 
 Solution::~Solution()
