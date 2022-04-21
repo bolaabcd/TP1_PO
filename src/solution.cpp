@@ -39,6 +39,11 @@ Solution::Solution(Tableau &t, Solution &aux_sol)
 
 bool Solution::is_zero()
 {
+    assert(this->sol.size() != 0);
+    assert(this->basis.size() != 0);
+    assert(this->cert.size() != 0);
+
+    return mpq_cmp_si(this->solval,0,1);
 }
 
 void Solution::print_yt(std::ostream &out)
