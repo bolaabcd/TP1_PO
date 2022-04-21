@@ -7,6 +7,8 @@
 
 int main()
 {
+    std::cout.precision(4);
+    std::cout << std::fixed;
     int n, m;
     std::cin >> n >> m;
     Tableau tableau(n, m), aux(n, m + n);
