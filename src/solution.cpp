@@ -3,12 +3,13 @@
 #include <vector>
 #include <gmp.h>
 #include <assert.h>
+#include <iostream>
 
 Solution::Solution(Tableau &t)
 {
     assert(this->sol.size() == 0);
     assert(this->basis.size() == 0);
-    assert(this->cert.size() == 0);
+    assert(this->inv_cert.size() == 0);
 
     int n = t.get_n();
     int m = t.get_m()-n;// this m is the auxiliar number of columns
@@ -28,7 +29,7 @@ Solution::Solution(Tableau &t, Solution &aux_sol)
 {
     assert(this->sol.size() == 0);
     assert(this->basis.size() == 0);
-    assert(this->cert.size() == 0);
+    assert(this->inv_cert.size() == 0);
 
     int n = t.get_n(), m = t.get_m();
     this->sol = aux_sol.sol;
@@ -41,13 +42,17 @@ bool Solution::is_zero()
 {
     assert(this->sol.size() != 0);
     assert(this->basis.size() != 0);
-    assert(this->cert.size() != 0);
+    assert(this->inv_cert.size() != 0);
 
     return mpq_cmp_si(this->solval,0,1);
 }
 
-void Solution::print_yt(std::ostream &out)
+void Solution::print_inv_cert(std::ostream &out)
 {
+    assert(this->inv_cert.size() == this->basis.size());
+    for(int i = 0; i < this->inv_cert.size()-1; i++)
+        std::cout << this->inv_cert[i] << " ";
+    std::cout << this->inv_cert[this->inv_cert.size()-1] << std::endl;
 }
 
 std::ostream &operator<<(std::ostream &os, Solution &s)

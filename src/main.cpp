@@ -23,7 +23,7 @@ int main()
     else // If auxiliar optimal is not zero, it's not possible to satisfy the requirements
     {
         std::cout << "inviavel" << std::endl;
-        aux_sol.print_yt(std::cout);
+        aux_sol.print_inv_cert(std::cout);
         std::cout << std::endl;
     }
 

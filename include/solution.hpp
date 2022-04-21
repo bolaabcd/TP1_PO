@@ -12,14 +12,15 @@ class Solution
         Solution(Tableau &t);
         Solution(Tableau &t, Solution &aux_sol);
         bool is_zero();
-        void print_yt(std::ostream &out);
+        void print_inv_cert(std::ostream &out);
         friend std::ostream &operator<<(std::ostream &os, Solution &s);
         ~Solution();
     private:
-        void solve(Tableau &t);
+        bool infinite;
         mpq_t solval;
+        void solve(Tableau &t);
         std::vector<mpq_t> sol;
-        std::vector<int> cert;
+        std::vector<int> inv_cert;
         std::vector<int> basis;
 };
 
