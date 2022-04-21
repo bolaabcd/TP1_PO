@@ -74,9 +74,8 @@ std::ostream &operator<<(std::ostream &out, Solution &s)
 
 void Solution::solve(Tableau &t)
 {
-    mpq_t minusone;
     // rewrite in canonical form
-    this->canon();
+    this->canon(t);
 
     for (int j = 0; j < t.m; j++)
         if (t.tab[0][j] > 0)
@@ -101,7 +100,7 @@ void Solution::solve(Tableau &t)
             if (maxii != -1) // maxii is o r, k is o j, at the pseudocode we saw in class
             {
                 // now we remove the maxii'th identity column and add column j.
-                this->basis[maxii - 1] = j;
+                this->basis[maxii] = j;
                 this->solve(t);
                 return;
             }
@@ -112,6 +111,17 @@ void Solution::solve(Tableau &t)
         }
     // if didn't find positive c, it's already optimal
     this->optim();
+}
+
+void Solution::canon(Tableau &t)
+{
+    assert(this->basis.size() == t.m);
+    for (int i = 0; i < this->basis.size(); i++)
+    {
+        // make this line and column be one by gaussian elimination
+        // this may cause problems. Think about it later, if it's impossible to do it in some case.
+        t.makeone(this->basis[i], i + 1);
+    }
 }
 
 Solution::~Solution()

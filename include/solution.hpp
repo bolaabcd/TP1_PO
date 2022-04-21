@@ -20,7 +20,7 @@ class Solution
         bool infinite;
         mpq_t solval;
         void solve(Tableau &t);
-        void canon();
+        void canon(Tableau &t);
         void ilim();
         void optim();
         std::vector<mpq_t> sol;
