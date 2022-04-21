@@ -42,7 +42,7 @@ void Tableau::get_auxiliar(Tableau &aux)
     assert(aux.m == this->n + this->m);
     assert(aux.tab.size() == aux.n + 1);
     assert(aux.tab[0].size() == aux.m + 1);
-    
+
     int k = 0, m = this->m, n = this->m;
     for (int i = 0; i < n + 1; i++)
     {
@@ -63,6 +63,16 @@ void Tableau::get_auxiliar(Tableau &aux)
             mpq_set(aux.tab[i][m + n], this->tab[i][m]);
         }
     }
+}
+
+int Tableau::get_n()
+{
+    return this->n;
+}
+
+int Tableau::get_m()
+{
+    return this->m;
 }
 
 Tableau::~Tableau()

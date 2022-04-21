@@ -11,8 +11,9 @@ class Tableau
         Tableau(int n, int m);
         void read(std::istream &in);
         void get_auxiliar(Tableau &aux);
+        int get_n();
+        int get_m();
         ~Tableau();
-
     private:
         int n;
         int m;
