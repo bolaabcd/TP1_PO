@@ -15,10 +15,14 @@ class Solution
         void print_inv_cert(std::ostream &out);
         friend std::ostream &operator<<(std::ostream &out, Solution &s);
         ~Solution();
+
     private:
         bool infinite;
         mpq_t solval;
         void solve(Tableau &t);
+        void canon();
+        void ilim();
+        void optim();
         std::vector<mpq_t> sol;
         std::vector<int> inv_cert;
         std::vector<int> viab_cert;

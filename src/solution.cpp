@@ -74,6 +74,44 @@ std::ostream &operator<<(std::ostream &out, Solution &s)
 
 void Solution::solve(Tableau &t)
 {
+    mpq_t minusone;
+    // rewrite in canonical form
+    this->canon();
+
+    for (int j = 0; j < t.m; j++)
+        if (t.tab[0][j] > 0)
+        {
+            mpq_t maxi;
+            int maxii = -1;
+            mpq_set_si(maxi, -1, 1);
+            for (int i = 1; i <= t.n; i++)
+            {
+                if (t.tab[i][j] > 0)
+                {
+                    // found positive a
+                    mpq_t div;
+                    mpq_div(div, t.tab[i][t.m + 1], t.tab[i][j]);
+                    if (mpq_cmp(maxi, div) > 0)
+                    { // if it's strictly smaller than the current maximum
+                        mpq_set(maxi, div);
+                        maxii = i;
+                    }
+                }
+            }
+            if (maxii != -1) // maxii is o r, k is o j, at the pseudocode we saw in class
+            {
+                // now we remove the maxii'th identity column and add column j.
+                this->basis[maxii - 1] = j;
+                this->solve(t);
+                return;
+            }
+
+            // if didn't find positive a, it's ilimited
+            this->ilim();
+            return;
+        }
+    // if didn't find positive c, it's already optimal
+    this->optim();
 }
 
 Solution::~Solution()
