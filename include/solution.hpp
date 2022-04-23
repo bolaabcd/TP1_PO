@@ -1,10 +1,10 @@
 #ifndef SOLUTION_CLASS_4_LINEAR_PROGRAMMING
 #define SOLUTION_CLASS_4_LINEAR_PROGRAMMING
 
-#include "tableau.hpp"
-#include <gmp.h>
+#include <gmpxx.h>
 #include <iostream>
 #include <vector>
+#include "tableau.hpp"
 
 class Solution
 {
@@ -18,14 +18,14 @@ class Solution
 
     private:
         bool infinite;
-        mpq_t solval;
+        mpq_class solval;
         void solve(Tableau &t);
         void canon(Tableau &t);
         void ilim(int negvar, Tableau &t);
         void optim();
-        std::vector<mpq_t> sol;
+        std::vector<mpq_class> sol;
         std::vector<int> inv_cert;
-        std::vector<mpq_t> viab_cert;
+        std::vector<mpq_class> viab_cert;
         std::vector<int> basis;
 };
 

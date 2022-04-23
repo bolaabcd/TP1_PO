@@ -1,7 +1,7 @@
 #include "solution.hpp"
 #include "tableau.hpp"
 #include <vector>
-#include <gmp.h>
+#include <gmpxx.h>
 #include <assert.h>
 #include <iostream>
 
@@ -10,14 +10,18 @@ Solution::Solution(Tableau &t)
     assert(this->sol.size() == 0);
     assert(this->basis.size() == 0);
     assert(this->inv_cert.size() == 0);
+    assert(t.tab[0].size() == t.n+1);
 
     int n = t.get_n();
     int m = t.get_m() - n; // this m is the auxiliar number of columns
     this->sol.resize(m + n);
     for (int i = 0; i < m; i++)
-        mpq_init(this->sol[i]);
+        this->sol[i] = 0;
     for (int i = 0; i < n; i++)
-        mpq_set(this->sol[m + i], t.tab[m + 1][i + 1]);
+        this->sol[m + i] = t.tab[m + 1][i + 1];
+
+    for (int i = 0; i < n; i++)
+        this->sol[m + i] = t.tab[m + 1][i + 1];
     this->basis.resize(n);
     for (int i = 0; i < n; i++)
         this->basis[i] = m + i;
@@ -31,7 +35,6 @@ Solution::Solution(Tableau &t, Solution &aux_sol)
     assert(this->basis.size() == 0);
     assert(this->inv_cert.size() == 0);
 
-    int n = t.get_n(), m = t.get_m();
     this->sol = aux_sol.sol;
     this->basis = aux_sol.basis;
 
@@ -44,7 +47,7 @@ bool Solution::is_zero()
     assert(this->basis.size() != 0);
     assert(this->inv_cert.size() != 0);
 
-    return mpq_cmp_si(this->solval, 0, 1);
+    return !mpq_sgn(this->solval.get_mpq_t());
 }
 
 void Solution::print_inv_cert(std::ostream &out)
@@ -61,15 +64,16 @@ std::ostream &operator<<(std::ostream &out, Solution &s)
         out << "ilimitada" << std::endl;
     else
         out << "otima" << std::endl
-            << mpq_get_d(s.solval) << std::endl;
+            << s.solval.get_d() << std::endl;
 
     for (int i = 0; i < s.sol.size() - 1; i++)
-        out << s.sol[i] << " ";
-    out << s.sol[s.sol.size() - 1] << std::endl;
+        out << s.sol[i].get_d() << " ";
+    out << s.sol[s.sol.size() - 1].get_d() << std::endl;
 
     for (int i = 0; i < s.viab_cert.size() - 1; i++)
-        out << s.viab_cert[i] << " ";
-    out << s.viab_cert[s.viab_cert.size() - 1] << std::endl;
+        out << s.viab_cert[i].get_d() << " ";
+    out << s.viab_cert[s.viab_cert.size() - 1].get_d() << std::endl;
+    return out;
 }
 
 void Solution::solve(Tableau &t)
@@ -80,19 +84,19 @@ void Solution::solve(Tableau &t)
     for (int j = 0; j < t.m; j++)
         if (t.tab[0][j] > 0)
         {
-            mpq_t maxi;
+            mpq_class maxi;
             int maxii = -1;
-            mpq_set_si(maxi, -1, 1);
+            maxi = -1;
             for (int i = 1; i <= t.n; i++)
             {
                 if (t.tab[i][j] > 0)
                 {
                     // found positive a
-                    mpq_t div;
-                    mpq_div(div, t.tab[i][t.m + 1], t.tab[i][j]);
-                    if (mpq_cmp(maxi, div) > 0)
-                    { // if it's strictly smaller than the current maximum
-                        mpq_set(maxi, div);
+                    mpq_class div;
+                    div = t.tab[i][t.m + 1] / t.tab[i][j];
+                    if (div > maxi)
+                    { // if it's strictly bigger than the current maximum
+                        maxi = div;
                         maxii = i;
                     }
                 }
@@ -132,23 +136,23 @@ void Solution::ilim(int negvar, Tableau &t)
     this->viab_cert.resize(t.m);
 
     for (int i = 0; i < t.m; i++)
-        mpq_init(this->viab_cert[i]);
+        this->viab_cert[i] = 0;
 
     assert(this->basis.size() == this->sol.size());
     for (int i = 0; i < this->basis.size(); i++)
-        mpq_set(this->viab_cert[this->basis[i]], this->sol[i]);
+        this->viab_cert[this->basis[i]] = this->sol[i];
 
-    assert(mpq_cmp_si(this->viab_cert[negvar], 0, 1));
-    mpq_set_si(this->viab_cert[negvar], 1, 1);
+    assert(mpq_cmp_si(this->viab_cert[negvar].get_mpq_t(), 0, 1));
+    this->viab_cert[negvar] = 1;
 }
 
 void Solution::optim()
 {
     this->infinite = false;
-    mpq_neg(this->solval,this->solval);
+    this->solval = -this->solval;
     assert(this->viab_cert.size());
-    for(int i = 0; i < this->viab_cert.size(); i++)
-        mpq_neg(this->viab_cert[i],this->viab_cert[i]);
+    for (int i = 0; i < this->viab_cert.size(); i++)
+        this->viab_cert[i] = -this->viab_cert[i];
 }
 
 Solution::~Solution()

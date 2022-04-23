@@ -1,11 +1,16 @@
 #include <iostream>
 #include <vector>
+#include <assert.h>
 #include "solution.hpp"
 #include "tableau.hpp"
 
+// CHECK IF SOLUTION CANON MAKEONE WORKS: yes, if it's a basis it can be the identity
 // REMOVE ALL ASSERTS AFTER EVERYTHING IS CORRECT!!!!
+
+// REVERT NEGATIVE B
 // REMOVE EXTRA RESTRICTIONS
-// CHECK IF SOLUTION CANON MAKEONE WORKS
+// TEST CYCLING EXAMPLES
+// ADD EXACT ANSWER OPTION
 
 int main()
 {
@@ -15,6 +20,11 @@ int main()
     std::cin >> n >> m;
     Tableau tableau(n, m), aux(n, m + n);
     tableau.read(std::cin);
+    // tableau.rem_extra();
+    // tableau.positive_b();
+
+    n = tableau.get_n();
+    assert(tableau.get_m() == m);
 
     tableau.get_auxiliar(aux);
     Solution aux_sol(aux);

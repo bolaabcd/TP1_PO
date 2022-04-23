@@ -1,12 +1,14 @@
 #include "tableau.hpp"
 
 #include <assert.h>
+#include <vector>
+#include <gmpxx.h>
 
-Tableau::Tableau(int n, int m) : n(n), m(m)
+Tableau::Tableau(int nc, int mc) : n(nc), m(mc)
 {
-    assert(n > 0);
-    assert(m > 0);
-    this->tab.resize(n + 1, std::vector<mpq_t>(m + 1));
+    assert(nc > 0);
+    assert(mc > 0);
+    this->tab.resize(nc + 1, std::vector<mpq_class>(mc + 1));
 }
 
 void Tableau::read(std::istream &in)
@@ -22,12 +24,12 @@ void Tableau::read(std::istream &in)
         {
             if (i == 0 && j == this->m)
             {
-                mpq_init(this->tab[i][j]);
+                this->tab[i][j] = 0;
                 continue;
             }
             long int v;
             in >> v;
-            mpq_set_si(this->tab[i][j], v, 1);
+            this->tab[i][j] = v;
         }
     }
 }
@@ -43,24 +45,24 @@ void Tableau::get_auxiliar(Tableau &aux)
     assert(aux.tab.size() == aux.n + 1);
     assert(aux.tab[0].size() == aux.m + 1);
 
-    int k = 0, m = this->m, n = this->m;
-    for (int i = 0; i < n + 1; i++)
+    int k = 0, mc = this->m, nc = this->m;
+    for (int i = 0; i < nc + 1; i++)
     {
-        for (int j = 0; j < m; j++)
-            mpq_set(aux.tab[i][j], this->tab[i][j]);
+        for (int j = 0; j < mc; j++)
+            aux.tab[i][j] = this->tab[i][j];
         if (i == 0)
         {
-            for (int j = m; j < m + n; j++)
-                mpq_set_si(aux.tab[i][j], -1, 1);
-            mpq_init(aux.tab[i][m + n]);
+            for (int j = mc; j < mc + nc; j++)
+                aux.tab[i][j] = -1;
+            aux.tab[i][mc + nc] = 0;
         }
         else
         {
-            for (int j = m; j < m + n; j++)
-                mpq_init(aux.tab[i][j]);
-            assert(k < n);
-            mpq_set_si(aux.tab[i][m + k++], 1, 1);
-            mpq_set(aux.tab[i][m + n], this->tab[i][m]);
+            for (int j = mc; j < mc + nc; j++)
+                aux.tab[i][j] = 0;
+            assert(k < nc);
+            aux.tab[i][mc + k++] = 1;
+            aux.tab[i][mc + nc] = this->tab[i][mc];
         }
     }
 }
@@ -75,7 +77,7 @@ int Tableau::get_m()
     return this->m;
 }
 
-void Tableau::makeone(int lin, int col, std::vector<mpq_t> &viab_cert)
+void Tableau::makeone(int lin, int col, std::vector<mpq_class> &viab_cert)
 {
     assert(this->n > 0);
     assert(this->m > 0);
@@ -85,19 +87,19 @@ void Tableau::makeone(int lin, int col, std::vector<mpq_t> &viab_cert)
     assert(lin > 0);
     assert(col < this->m);
 
-    mpq_t dval;
-    mpq_div(dval, this->tab[0][col], this->tab[lin][col]);
-    mpq_neg(dval, dval);
-    mpq_add(viab_cert[lin], viab_cert[lin], dval);
+    mpq_class dval;
+    dval = this->tab[0][col]/this->tab[lin][col];
+    dval= -dval;
+    viab_cert[lin]= viab_cert[lin]+ dval;
 
-    assert(mpq_sgn(this->tab[lin][col]));
+    assert(mpq_sgn(this->tab[lin][col].get_mpq_t()));
     this->div(this->tab[lin], this->tab[lin][col]); // first /= val
 
     for (int i = 0; i < this->n + 1; i++)
         this->sub(this->tab[i], this->tab[lin], this->tab[i][col]); // first -= second*val
 }
 
-void Tableau::div(std::vector<mpq_t> &first, mpq_t &val)
+void Tableau::div(std::vector<mpq_class> &first, mpq_class &val)
 {
     assert(this->n > 0);
     assert(this->m > 0);
@@ -105,10 +107,10 @@ void Tableau::div(std::vector<mpq_t> &first, mpq_t &val)
     assert(this->tab[0].size() == this->m + 1);
     assert(first.size() == this->m + 1);
     for (int i = 0; i < this->m + 1; i++)
-        mpq_div(first[i], first[i], val);
+        first[i]= first[i]/ val;
 }
 
-void Tableau::sub(std::vector<mpq_t> &first, std::vector<mpq_t> &second, mpq_t &val)
+void Tableau::sub(std::vector<mpq_class> &first, std::vector<mpq_class> &second, mpq_class &val)
 {
     assert(this->n > 0);
     assert(this->m > 0);
@@ -118,9 +120,9 @@ void Tableau::sub(std::vector<mpq_t> &first, std::vector<mpq_t> &second, mpq_t &
     assert(second.size() == this->m + 1);
     for (int i = 0; i < this->m + 1; i++)
     {
-        mpq_t mul;
-        mpq_mul(mul, second[i], val);
-        mpq_sub(first[i], first[i], val);
+        mpq_class mul;
+        mul = second[i]* val;
+        first[i] = first[i] - val;
     }
 }
 

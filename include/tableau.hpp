@@ -2,9 +2,9 @@
 #define TABLEAU_CLASS_4_LINEAR_PROGRAMMING
 
 #include <vector>
-#include <gmp.h>
+#include <gmpxx.h>
 #include <iostream>
-#include "solution.hpp"
+// #include "solution.hpp"
 
 class Tableau
 {
@@ -14,16 +14,16 @@ class Tableau
         void get_auxiliar(Tableau &aux);
         int get_n();
         int get_m();
-        void makeone(int lin, int col, std::vector<mpq_t> &viab_cert);
+        void makeone(int lin, int col, std::vector<mpq_class> &viab_cert);
         ~Tableau();
-        friend Solution;
+        friend class Solution;
 
     private:
         int n;
         int m;
-        void div(std::vector<mpq_t> &first, mpq_t &val);
-        void sub(std::vector<mpq_t> &first, std::vector<mpq_t> &second, mpq_t &val);
-        std::vector<std::vector<mpq_t>> tab;
+        void div(std::vector<mpq_class> &first, mpq_class &val);
+        void sub(std::vector<mpq_class> &first, std::vector<mpq_class> &second, mpq_class &val);
+        std::vector<std::vector<mpq_class>> tab;
 };
 
 #endif
