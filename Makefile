@@ -4,7 +4,7 @@ OBJ_FOLDER = ./obj/
 SRC_FOLDER = ./src/
 
 CC = g++
-CFLAGS = -Wall -c -I$(INCLUDE_FOLDER)
+CFLAGS = -Wall -c -I$(INCLUDE_FOLDER) -O2
 LIBS = -lgmp
 
 # Arquivos
