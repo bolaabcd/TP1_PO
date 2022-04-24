@@ -14,7 +14,7 @@ class Tableau
         void get_auxiliar(Tableau &aux);
         int get_n();
         int get_m();
-        void makeone(int lin, int col, std::vector<mpq_class> &viab_cert);
+        void makeone(int lin, int col, std::vector<std::vector<mpq_class>> &viab_cert);
         void positive_b();
         // true if didn't find example. If false, it already prints the certificate
         bool rem_extra(std::ostream &out, bool as_rational);

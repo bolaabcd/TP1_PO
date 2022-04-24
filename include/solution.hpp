@@ -25,7 +25,7 @@ class Solution
         void ilim(int negvar, Tableau &t);
         void optim(Tableau &t);
         std::vector<mpq_class> sol;
-        std::vector<mpq_class> cert;
+        std::vector<std::vector<mpq_class>> cert;
         std::vector<int> basis;
 };
 

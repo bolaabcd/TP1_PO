@@ -43,7 +43,9 @@ Solution::Solution(Tableau &t, bool as_rational2) : as_rational(as_rational2)
         else
             assert(t.tab[i + 1][m] == 0);
 
-    this->cert.resize(n);
+    this->cert.resize(n + 1, std::vector<mpq_class>(n, 0));
+    for (int i = 1; i < n + 1; i++)
+        this->cert[i][i - 1] = 1;
 
     this->solve(t);
 }
@@ -87,7 +89,9 @@ Solution::Solution(Tableau &t, Solution &aux_sol, bool as_rational2) : as_ration
 
     this->sol.resize(t.m);
 
-    this->cert.resize(t.n);
+    this->cert.resize(t.n + 1, std::vector<mpq_class>(t.n, 0));
+    for (int i = 1; i < t.n + 1; i++)
+        this->cert[i][i - 1] = 1;
 
     this->solve(t);
 }
@@ -97,58 +101,61 @@ bool Solution::is_zero()
     assert(this->sol.size() != 0);
     assert(this->basis.size() != 0);
     assert(this->cert.size() != 0);
+    assert(this->cert[0].size() != 0);
     // std::cout << this->solval.get_str() << std::endl;
     return !mpq_sgn(this->solval.get_mpq_t());
 }
 
 void Solution::print_inv_cert(std::ostream &out)
 {
-    assert(this->cert.size() == this->basis.size());
-    for (int i = 0; i < this->cert.size() - 1; i++)
-        if(!this->as_rational)
-            out << this->cert[i].get_d() << " ";
+    assert(this->cert[0].size() == this->basis.size());
+    for (int i = 0; i < this->cert[0].size() - 1; i++)
+        if (!this->as_rational)
+            out << this->cert[0][i].get_d() << " ";
         else
-            out << this->cert[i].get_str() << " ";
-    if(!this->as_rational)
-        out << this->cert[this->cert.size() - 1].get_d() << std::endl;
+            out << this->cert[0][i].get_str() << " ";
+    if (!this->as_rational)
+        out << this->cert[0][this->cert[0].size() - 1].get_d() << std::endl;
     else
-        out << this->cert[this->cert.size() - 1].get_str() << std::endl;
+        out << this->cert[0][this->cert[0].size() - 1].get_str() << std::endl;
 }
 
 std::ostream &operator<<(std::ostream &out, Solution &s)
 {
     if (s.infinite)
         out << "ilimitada" << std::endl;
-    else{
-        if(!s.as_rational)
-            out << "otima" << std::endl << s.solval.get_d() << std::endl;
+    else
+    {
+        if (!s.as_rational)
+            out << "otima" << std::endl
+                << s.solval.get_d() << std::endl;
         else
-            out << "otima" << std::endl << s.solval.get_str() << std::endl;
+            out << "otima" << std::endl
+                << s.solval.get_str() << std::endl;
     }
 
     for (int i = 0; i < s.sol.size() - 1; i++)
-        if(!s.as_rational)
+        if (!s.as_rational)
             out << s.sol[i].get_d() << " ";
         else
             out << s.sol[i].get_str() << " ";
-            
-    if(!s.as_rational)
+
+    if (!s.as_rational)
         out << s.sol[s.sol.size() - 1].get_d() << std::endl;
     else
         out << s.sol[s.sol.size() - 1].get_str() << std::endl;
-        
 
-    for (int i = 0; i < s.cert.size() - 1; i++)
-        if(!s.as_rational)
-            out << s.cert[i].get_d() << " ";
+    for (int i = 0; i < s.cert[0].size() - 1; i++)
+        if (!s.as_rational)
+            out << s.cert[0][i].get_d() << " ";
         else
-            out << s.cert[i].get_str() << " ";
-            
-    if(!s.as_rational)
-        out << s.cert[s.cert.size() - 1].get_d() << std::endl;
+            out << s.cert[0][i].get_str() << " ";
+
+    if (!s.as_rational)
+        out << s.cert[0][s.cert[0].size() - 1].get_d() << std::endl;
     else
-        out << s.cert[s.cert.size() - 1].get_str() << std::endl;
-        
+        out << s.cert[0][s.cert[0].size() - 1].get_str() << std::endl;
+
     return out;
 }
 
@@ -166,6 +173,14 @@ void Solution::solve(Tableau &t)
     // for (int i = 0; i < this->basis.size(); i++)
     // {
     //     std::cout << this->basis[i] << " ";
+    // }
+    // std::cout << std::endl;
+    // std::cout << "CERTIFICATE: " << std::endl;
+    // for (int i = 0; i < this->cert.size(); i++)
+    // {
+    //     for (int j = 0; j < this->cert[i].size(); j++)
+    //         std::cout << this->cert[i][j].get_str() << " ";
+    //     std::cout << std::endl;
     // }
     // std::cout << std::endl;
 
@@ -247,18 +262,20 @@ void Solution::ilim(int negvar, Tableau &t)
     assert(negvar >= 0);
     assert(negvar < t.m);
     this->infinite = true;
-    this->cert.clear();
-    this->cert.resize(t.m);
+    std::vector<mpq_class> infcert(t.m);
+    // this->cert.clear();
+    // this->cert.resize(t.m);
 
     for (int i = 0; i < t.m; i++)
-        this->cert[i] = 0;
+        infcert[i] = 0;
 
-    assert(this->cert.size() == t.m);
+    assert(infcert.size() == t.m);
     for (int i = 0; i < this->basis.size(); i++)
-        this->cert[this->basis[i]] = -t.tab[i + 1][negvar];
+        infcert[this->basis[i]] = -t.tab[i + 1][negvar];
 
-    assert(this->cert[negvar] <= 0);
-    this->cert[negvar] = 1;
+    assert(infcert[negvar] <= 0);
+    infcert[negvar] = 1;
+    this->cert[0] = infcert;
 }
 
 void Solution::optim(Tableau &t)
@@ -266,22 +283,23 @@ void Solution::optim(Tableau &t)
     this->infinite = false;
     this->solval = -this->solval;
     assert(this->cert.size());
-    for (int i = 0; i < this->cert.size(); i++)
-        this->cert[i] = -this->cert[i] * (1 - 2 * t.invs[i + 1]);
+    assert(this->cert[0].size());
+    for (int i = 0; i < this->cert[0].size(); i++)
+        this->cert[0][i] = -this->cert[0][i] * (1 - 2 * t.invs[i + 1]);
     // std::cout << "Cert: " << std::endl;
-    // for(int i = 0; i < this->cert.size(); i++)
-    //     std::cout << this->cert[i].get_str() << std::endl;
+    // for(int i = 0; i < this->cert[0].size(); i++)
+    //     std::cout << this->cert[0][i].get_str() << std::endl;
     // std::cout << "Rems: " << std::endl;
     // for(int i = 0; i < t.rems.size(); i++)
     //     std::cout << t.rems[i] << std::endl;
 
-    this->cert.resize(this->cert.size() + t.rems.size());
+    this->cert[0].resize(this->cert[0].size() + t.rems.size());
     for (int i = 0; i < t.rems.size(); i++)
     {
         // rems values are "1-based"
-        for (int j = t.rems[i]; j < this->cert.size(); j++)
-            this->cert[j] = this->cert[j - 1];
-        this->cert[t.rems[i] - 1] = 0;
+        for (int j = t.rems[i]; j < this->cert[0].size(); j++)
+            this->cert[0][j] = this->cert[0][j - 1];
+        this->cert[0][t.rems[i] - 1] = 0;
     }
 }
 
