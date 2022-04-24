@@ -11,6 +11,7 @@
 // REMOVE EXTRA RESTRICTIONS
 // TEST CYCLING EXAMPLES
 // ADD EXACT ANSWER OPTION
+// IF ITS'S SLOW, SOLVE() NON-RECURSIVE
 
 int main()
 {
@@ -22,6 +23,7 @@ int main()
     tableau.read(std::cin);
     // tableau.rem_extra();
     // tableau.positive_b();
+
 
     n = tableau.get_n();
     assert(tableau.get_m() == m);

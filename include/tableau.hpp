@@ -21,8 +21,9 @@ class Tableau
     private:
         int n;
         int m;
-        void div(std::vector<mpq_class> &first, mpq_class &val);
-        void sub(std::vector<mpq_class> &first, std::vector<mpq_class> &second, mpq_class &val);
+        void print_tab();// Debugging purposes
+        void div(std::vector<mpq_class> &first, mpq_class val);
+        void sub(std::vector<mpq_class> &first, std::vector<mpq_class> &second, mpq_class val);
         std::vector<std::vector<mpq_class>> tab;
 };
 
