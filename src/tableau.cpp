@@ -95,15 +95,15 @@ void Tableau::makeone(int lin, int col, std::vector<mpq_class> &viab_cert)
 
     mpq_class dval;
     dval = this->tab[0][col] / this->tab[lin][col];
-    viab_cert[lin-1] = viab_cert[lin-1] - dval;
+    viab_cert[lin - 1] = viab_cert[lin - 1] - dval;
 
     assert(mpq_sgn(this->tab[lin][col].get_mpq_t()));
     this->div(this->tab[lin], this->tab[lin][col]); // first /= val
 
     for (int i = 0; i < this->n + 1; i++)
-        if(i != lin && this->tab[i][col] != 0)
+        if (i != lin && this->tab[i][col] != 0)
             this->sub(this->tab[i], this->tab[lin], this->tab[i][col]); // first -= second*val
-    
+
     // this->print_tab();
 }
 
@@ -126,7 +126,8 @@ void Tableau::sub(std::vector<mpq_class> &first, std::vector<mpq_class> &second,
     assert(this->tab[0].size() == this->m + 1);
     assert(first.size() == this->m + 1);
     assert(second.size() == this->m + 1);
-    for (int i = 0; i < this->m + 1; i++){
+    for (int i = 0; i < this->m + 1; i++)
+    {
         // std::cout << i << "x" << first[this->m].get_str() <<"y" << second[this->m].get_str() << "z"
         // << val.get_str() << "ç";
         // std::cout << ((mpq_class)(first[this->m]-second[this->m]*val)).get_str() << " ";
@@ -135,14 +136,25 @@ void Tableau::sub(std::vector<mpq_class> &first, std::vector<mpq_class> &second,
     std::cout << std::endl;
 }
 
-void Tableau::print_tab () {
-    for(int i = 0; i < this->n+1; i++) {
-        for(int j = 0; j < this->m+1; j++) {
+void Tableau::print_tab()
+{
+    for (int i = 0; i < this->n + 1; i++)
+    {
+        for (int j = 0; j < this->m + 1; j++)
+        {
             std::cout << this->tab[i][j].get_str() << " ";
         }
         std::cout << std::endl;
     }
     std::cout << std::endl;
+}
+
+void Tableau::positive_b()
+{
+    for (int i = 0; i < this->n + 1; i++)
+        if (this->tab[i][this->m] < 0)
+            for (int j = 0; j < this->m + 1; j++)
+                this->tab[i][j] = -this->tab[i][j];
 }
 
 Tableau::~Tableau()

@@ -50,6 +50,13 @@ Solution::Solution(Tableau &t, Solution &aux_sol)
     //     std::cout << aux_sol.sol[i].get_str() << " ";
     // }
     // std::cout << std::endl;
+    // std::cout << aux_sol.solval.get_str() << std::endl;
+    // std::cout << "basis_post:" << std::endl;
+    // for (int i = 0; i < t.n; i++)
+    // {
+    //     std::cout << aux_sol.basis[i] << " ";
+    // }
+    // std::cout << std::endl;
 
     assert(aux_sol.sol.size() == t.m + t.n);
     for (int i = 0; i < t.n; i++)
@@ -113,9 +120,7 @@ std::ostream &operator<<(std::ostream &out, Solution &s)
 
 void Solution::solve(Tableau &t)
 {
-    for (int i = 0; i < t.n; i++)
-        assert(t.tab[i][t.m] >= 0);
-
+    // t.print_tab();
     // std::cout << "SOL: " << std::endl;
     // for (int i = 0; i < this->sol.size(); i++)
     // {
@@ -129,12 +134,18 @@ void Solution::solve(Tableau &t)
     // }
     // std::cout << std::endl;
 
+    for (int i = 0; i < t.n; i++)
+        assert(t.tab[i][t.m] >= 0);
+
     // rewrite in canonical form
     this->canon(t);
     this->solval = t.tab[0][t.m];
 
     // std::cout << "POSTCANON:" << std::endl;
     // t.print_tab();
+
+     for (int i = 1; i < t.n; i++)
+        assert(t.tab[i][t.m] >= 0);
 
     for (int j = 0; j < t.m; j++)
         if (t.tab[0][j] > 0)
@@ -150,7 +161,7 @@ void Solution::solve(Tableau &t)
                     mpq_class div;
                     div = t.tab[i][t.m] / t.tab[i][j];
                     // std::cout << "DIV " << div.get_str() << " " << i << " " << j << std::endl;
-                    if (div > maxi || maxii == -1)
+                    if (div < maxi || maxii == -1)
                     { // if it's strictly bigger than the current maximum
                         maxi = div;
                         maxii = i - 1; // variable to remove from basis
@@ -159,10 +170,17 @@ void Solution::solve(Tableau &t)
             }
             if (maxii != -1) // maxii is o r, k is o j, at the pseudocode we saw in class
             {
+                assert(this->basis.size() == t.n);
                 // now we remove the maxii'th identity column and add column j.
-
+                for(int i = 0; i < t.n; i++){
+                    // assert(this->basis[i] >= 0);
+                    // assert(this->basis[i] < t.m);
+                    this->sol[this->basis[i]] -= maxi*t.tab[i+1][j];
+                    // assert(this->basis[i] != j);
+                }
                 this->sol[j] = maxi;
-                this->sol[this->basis[maxii]] = 0;
+                assert(this->sol[this->basis[maxii]] == 0);
+                // this->sol[this->basis[maxii]] = 0;
                 this->basis[maxii] = j;
                 this->solve(t);
                 return;
@@ -201,7 +219,7 @@ void Solution::ilim(int negvar, Tableau &t)
 
     assert(this->viab_cert.size() == t.m);
     for (int i = 0; i < this->basis.size(); i++)
-        this->viab_cert[this->basis[i]] = this->sol[this->basis[i]];
+        this->viab_cert[this->basis[i]] = -t.tab[i+1][negvar];
 
     assert(this->viab_cert[negvar] <= 0);
     this->viab_cert[negvar] = 1;

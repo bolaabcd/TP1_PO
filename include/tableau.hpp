@@ -15,13 +15,14 @@ class Tableau
         int get_n();
         int get_m();
         void makeone(int lin, int col, std::vector<mpq_class> &viab_cert);
+        void positive_b();
         ~Tableau();
         friend class Solution;
 
     private:
         int n;
         int m;
-        void print_tab();// Debugging purposes
+        void print_tab(); // Debugging purposes
         void div(std::vector<mpq_class> &first, mpq_class val);
         void sub(std::vector<mpq_class> &first, std::vector<mpq_class> &second, mpq_class val);
         std::vector<std::vector<mpq_class>> tab;

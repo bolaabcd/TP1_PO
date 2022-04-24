@@ -7,11 +7,10 @@
 // CHECK IF SOLUTION CANON MAKEONE WORKS: yes, if it's a basis it can be the identity
 // REMOVE ALL ASSERTS AFTER EVERYTHING IS CORRECT!!!!
 
-// REVERT NEGATIVE B
 // REMOVE EXTRA RESTRICTIONS
 // TEST CYCLING EXAMPLES
 // ADD EXACT ANSWER OPTION
-// IF ITS'S SLOW, SOLVE() NON-RECURSIVE
+// SEE IF ITS'S SLOW, AND THEN MAKE SOLVE() NON-RECURSIVE
 
 int main()
 {
@@ -22,8 +21,7 @@ int main()
     Tableau tableau(n, m), aux(n, m + n);
     tableau.read(std::cin);
     // tableau.rem_extra();
-    // tableau.positive_b();
-
+    tableau.positive_b();
 
     n = tableau.get_n();
     assert(tableau.get_m() == m);
