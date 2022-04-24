@@ -8,6 +8,7 @@
 // REMOVE ALL ASSERTS AFTER EVERYTHING IS CORRECT!!!!
 
 // REMOVE EXTRA RESTRICTIONS
+// FIX ROW REDUCING CERTIFICATE
 // TEST CYCLING EXAMPLES
 // ADD EXACT ANSWER OPTION
 // SEE IF ITS'S SLOW, AND THEN MAKE SOLVE() NON-RECURSIVE
@@ -18,13 +19,15 @@ int main()
     std::cout << std::fixed;
     int n, m;
     std::cin >> n >> m;
-    Tableau tableau(n, m), aux(n, m + n);
+    Tableau tableau(n, m);
     tableau.read(std::cin);
-    // tableau.rem_extra();
+    if (!tableau.rem_extra(std::cout))
+        return 0;
     tableau.positive_b();
 
     n = tableau.get_n();
     assert(tableau.get_m() == m);
+    Tableau aux(n, m + n);
 
     tableau.get_auxiliar(aux);
     Solution aux_sol(aux);

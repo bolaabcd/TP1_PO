@@ -9,7 +9,6 @@ Solution::Solution(Tableau &t)
 {
     assert(this->sol.size() == 0);
     assert(this->basis.size() == 0);
-    assert(this->inv_cert.size() == 0);
 
     int n = t.get_n();
     int m = t.get_m() - n; // this m is the auxiliar number of columns
@@ -28,11 +27,23 @@ Solution::Solution(Tableau &t)
         this->sol[m + i] = t.tab[i + 1][n + m];
     }
     this->basis.resize(n);
+    std::vector<bool> valid(n, false);
+    for (int i = 1; i < n + 1; i++)
+        for (int j = 0; j < m; j++)
+        {
+            if (t.tab[i][j] != 0)
+            {
+                valid[i - 1] = true;
+                break;
+            }
+        }
     for (int i = 0; i < n; i++)
-        this->basis[i] = m + i;
+        if (valid[i])
+            this->basis[i] = m + i;
+        else
+            assert(t.tab[i + 1][m] == 0);
 
-    this->viab_cert.resize(n);
-    this->inv_cert.resize(n);
+    this->cert.resize(n);
 
     this->solve(t);
 }
@@ -41,7 +52,6 @@ Solution::Solution(Tableau &t, Solution &aux_sol)
 {
     assert(this->sol.size() == 0);
     assert(this->basis.size() == 0);
-    assert(this->inv_cert.size() == 0);
 
     // std::cout << "POSTAUX" << std::endl;
     // std::cout << aux_sol.solval.get_str() << std::endl;
@@ -50,13 +60,13 @@ Solution::Solution(Tableau &t, Solution &aux_sol)
     //     std::cout << aux_sol.sol[i].get_str() << " ";
     // }
     // std::cout << std::endl;
-    // std::cout << aux_sol.solval.get_str() << std::endl;
     // std::cout << "basis_post:" << std::endl;
     // for (int i = 0; i < t.n; i++)
     // {
     //     std::cout << aux_sol.basis[i] << " ";
     // }
     // std::cout << std::endl;
+    // t.print_tab();
 
     assert(aux_sol.sol.size() == t.m + t.n);
     for (int i = 0; i < t.n; i++)
@@ -77,8 +87,7 @@ Solution::Solution(Tableau &t, Solution &aux_sol)
 
     this->sol.resize(t.m);
 
-    this->viab_cert.resize(t.n);
-    this->inv_cert.resize(t.n);
+    this->cert.resize(t.n);
 
     this->solve(t);
 }
@@ -87,17 +96,17 @@ bool Solution::is_zero()
 {
     assert(this->sol.size() != 0);
     assert(this->basis.size() != 0);
-    assert(this->inv_cert.size() != 0 || this->viab_cert.size() != 0);
+    assert(this->cert.size() != 0);
     // std::cout << this->solval.get_str() << std::endl;
     return !mpq_sgn(this->solval.get_mpq_t());
 }
 
 void Solution::print_inv_cert(std::ostream &out)
 {
-    assert(this->inv_cert.size() == this->basis.size());
-    for (int i = 0; i < this->inv_cert.size() - 1; i++)
-        out << this->inv_cert[i] << " ";
-    out << this->inv_cert[this->inv_cert.size() - 1] << std::endl;
+    assert(this->cert.size() == this->basis.size());
+    for (int i = 0; i < this->cert.size() - 1; i++)
+        out << -this->cert[i].get_d() << " ";
+    out << -this->cert[this->cert.size() - 1].get_d() << std::endl;
 }
 
 std::ostream &operator<<(std::ostream &out, Solution &s)
@@ -112,14 +121,15 @@ std::ostream &operator<<(std::ostream &out, Solution &s)
         out << s.sol[i].get_d() << " ";
     out << s.sol[s.sol.size() - 1].get_d() << std::endl;
 
-    for (int i = 0; i < s.viab_cert.size() - 1; i++)
-        out << s.viab_cert[i].get_d() << " ";
-    out << s.viab_cert[s.viab_cert.size() - 1].get_d() << std::endl;
+    for (int i = 0; i < s.cert.size() - 1; i++)
+        out << s.cert[i].get_d() << " ";
+    out << s.cert[s.cert.size() - 1].get_d() << std::endl;
     return out;
 }
 
 void Solution::solve(Tableau &t)
 {
+    assert(t.m >= t.n);
     // t.print_tab();
     // std::cout << "SOL: " << std::endl;
     // for (int i = 0; i < this->sol.size(); i++)
@@ -144,7 +154,7 @@ void Solution::solve(Tableau &t)
     // std::cout << "POSTCANON:" << std::endl;
     // t.print_tab();
 
-     for (int i = 1; i < t.n; i++)
+    for (int i = 1; i < t.n; i++)
         assert(t.tab[i][t.m] >= 0);
 
     for (int j = 0; j < t.m; j++)
@@ -172,10 +182,11 @@ void Solution::solve(Tableau &t)
             {
                 assert(this->basis.size() == t.n);
                 // now we remove the maxii'th identity column and add column j.
-                for(int i = 0; i < t.n; i++){
+                for (int i = 0; i < t.n; i++)
+                {
                     // assert(this->basis[i] >= 0);
                     // assert(this->basis[i] < t.m);
-                    this->sol[this->basis[i]] -= maxi*t.tab[i+1][j];
+                    this->sol[this->basis[i]] -= maxi * t.tab[i + 1][j];
                     // assert(this->basis[i] != j);
                 }
                 this->sol[j] = maxi;
@@ -191,7 +202,7 @@ void Solution::solve(Tableau &t)
             return;
         }
     // if didn't find positive c, it's already optimal
-    this->optim();
+    this->optim(t);
 }
 
 void Solution::canon(Tableau &t)
@@ -199,9 +210,9 @@ void Solution::canon(Tableau &t)
     assert(this->basis.size() == t.n);
     for (int i = 0; i < t.n; i++)
     {
-        // make this line and column be one by gaussian elimination. viab_cert is used to update
+        // make this line and column be one by gaussian elimination. cert is used to update
         // the optmality certification.
-        t.makeone(i + 1, this->basis[i], this->viab_cert);
+        t.makeone(i + 1, this->basis[i], this->cert);
         // this may cause problems. Think about it later, if it's impossible to do it in some case.
     }
 }
@@ -211,27 +222,41 @@ void Solution::ilim(int negvar, Tableau &t)
     assert(negvar >= 0);
     assert(negvar < t.m);
     this->infinite = true;
-    this->viab_cert.clear();
-    this->viab_cert.resize(t.m);
+    this->cert.clear();
+    this->cert.resize(t.m);
 
     for (int i = 0; i < t.m; i++)
-        this->viab_cert[i] = 0;
+        this->cert[i] = 0;
 
-    assert(this->viab_cert.size() == t.m);
+    assert(this->cert.size() == t.m);
     for (int i = 0; i < this->basis.size(); i++)
-        this->viab_cert[this->basis[i]] = -t.tab[i+1][negvar];
+        this->cert[this->basis[i]] = -t.tab[i + 1][negvar];
 
-    assert(this->viab_cert[negvar] <= 0);
-    this->viab_cert[negvar] = 1;
+    assert(this->cert[negvar] <= 0);
+    this->cert[negvar] = 1;
 }
 
-void Solution::optim()
+void Solution::optim(Tableau &t)
 {
     this->infinite = false;
     this->solval = -this->solval;
-    assert(this->viab_cert.size());
-    for (int i = 0; i < this->viab_cert.size(); i++)
-        this->viab_cert[i] = -this->viab_cert[i];
+    assert(this->cert.size());
+    for (int i = 0; i < this->cert.size(); i++)
+        this->cert[i] = -this->cert[i]*(1-2*t.invs[i+1]);
+    // std::cout << "Cert: " << std::endl;
+    // for(int i = 0; i < this->cert.size(); i++)
+    //     std::cout << this->cert[i].get_str() << std::endl;
+    // std::cout << "Rems: " << std::endl;
+    // for(int i = 0; i < t.rems.size(); i++)
+    //     std::cout << t.rems[i] << std::endl;
+
+    this->cert.resize(this->cert.size()+t.rems.size());
+    for (int i = 0; i < t.rems.size(); i++) {
+        // rems values are "1-based"
+        for (int j = t.rems[i]; j < this->cert.size(); j++)
+            this->cert[j] = this->cert[j-1];
+        this->cert[t.rems[i]-1] = 0;
+    }
 }
 
 Solution::~Solution()

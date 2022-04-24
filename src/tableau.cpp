@@ -3,12 +3,13 @@
 #include <assert.h>
 #include <vector>
 #include <gmpxx.h>
+#include <iostream>
 
 Tableau::Tableau(int nc, int mc) : n(nc), m(mc)
 {
     assert(nc > 0);
     assert(mc > 0);
-    assert(mc >= nc);
+    // assert(mc >= nc);
     this->tab.resize(nc + 1, std::vector<mpq_class>(mc + 1));
 }
 
@@ -33,6 +34,8 @@ void Tableau::read(std::istream &in)
             this->tab[i][j] = v;
         }
     }
+    assert(this->invs.size() == 0);
+    this->invs.resize(this->n + 1,false);
 }
 
 void Tableau::get_auxiliar(Tableau &aux)
@@ -61,13 +64,23 @@ void Tableau::get_auxiliar(Tableau &aux)
         }
         else
         {
+            // bool ok = false;
+            // for (int j = 0; j < mc; j++)
+            //     if (this->tab[i][j] != 0)
+            //     {
+            //         ok = true;
+            //         break;
+            //     }
             for (int j = mc; j < mc + nc; j++)
                 aux.tab[i][j] = 0;
             assert(k < nc);
+            // if (ok)
             aux.tab[i][mc + k++] = 1;
             aux.tab[i][mc + nc] = this->tab[i][mc];
         }
     }
+    aux.rems = this->rems;
+    aux.invs = this->invs;
 }
 
 int Tableau::get_n()
@@ -89,6 +102,8 @@ void Tableau::makeone(int lin, int col, std::vector<mpq_class> &viab_cert)
     assert(viab_cert.size() == this->tab.size() - 1);
     assert(lin > 0);
     assert(col < this->m);
+    assert(this->tab[lin][col] != 0);
+    assert(!this->invs[0]);
 
     // std::cout << lin << " " << col  << " BEFORE: "<< std::endl;
     // this->print_tab();
@@ -133,7 +148,7 @@ void Tableau::sub(std::vector<mpq_class> &first, std::vector<mpq_class> &second,
         // std::cout << ((mpq_class)(first[this->m]-second[this->m]*val)).get_str() << " ";
         first[i] -= second[i] * val;
     }
-    std::cout << std::endl;
+    // std::cout << std::endl;
 }
 
 void Tableau::print_tab()
@@ -153,8 +168,89 @@ void Tableau::positive_b()
 {
     for (int i = 0; i < this->n + 1; i++)
         if (this->tab[i][this->m] < 0)
+        {
+            this->invs[i] = true;
             for (int j = 0; j < this->m + 1; j++)
                 this->tab[i][j] = -this->tab[i][j];
+        }
+}
+
+bool Tableau::rem_extra(std::ostream &out)
+{
+    std::vector<mpq_class> tmp(this->tab.size() - 1);
+    Tableau copy(*this);
+    for (int i = 1; i < this->n + 1; i++)
+    {
+        bool remthis = true;
+        for (int j = 0; j < this->m + 1; j++)
+        {
+            if (copy.tab[i][j] != 0)
+            {
+                if (j == this->m)
+                {
+                    out << "inviavel" << std::endl;
+                    tmp[i - 1] = 1;
+                    for (int k = 0; k < tmp.size() - 1; k++)
+                        out << tmp[k].get_d() << " ";
+                    out << tmp.back().get_d() << std::endl;
+                    return false;
+                }
+                remthis = false;
+                copy.makeone(i, j, tmp);
+                break;
+            }
+        }
+        if (remthis)
+            this->rems.push_back(i);
+    }
+    if (this->rems.size() == 0)
+        return true;
+    std::vector<std::vector<mpq_class>> tab2(
+        this->tab.size() - this->rems.size(),
+        std::vector<mpq_class>(this->tab[0].size()));
+    int newn = this->n - this->rems.size();
+    int j = 0;
+    for (int i = 1, ni = 1; i < this->n + 1; i++)
+    {
+        if (j < this->rems.size() && i == this->rems[j])
+        {
+            assert(this->rems[j] > 0);
+            j++;
+        }
+        else
+        {
+            for (int k = 0; k < this->m + 1; k++)
+                tab2[ni][k] = tab[i][k];
+            ni++;
+        }
+    }
+    assert(j == this->rems.size());
+    for (int i = 0; i < this->m + 1; i++)
+        tab2[0][i] = tab[0][i];
+    this->n = newn;
+    this->tab = tab2;
+    return true;
+
+    // int j = 0;
+    // for (int i = 1; i < this->n + 1; i++)
+    // {
+    //     if (j < this->rems.size() && i == this->rems[j])
+    //     {
+    //         for (int k = 0; k < this->m + 1; k++)
+    //             this->tab[i][k] = 0;
+    //         j++;
+    //     }
+    //     else
+    //     {
+    //         for (int k = 0; k < this->m + 1; k++)
+    //             this->tab[i][k] = tab[i][k];
+    //     }
+    // }
+    // assert(j == this->rems.size());
+    // for (int i = 0; i < this->m + 1; i++)
+    //     this->tab[0][i] = tab[0][i];
+
+    // return true;
 }
 
 Tableau::~Tableau()
