@@ -5,7 +5,7 @@
 #include <assert.h>
 #include <iostream>
 
-Solution::Solution(Tableau &t)
+Solution::Solution(Tableau &t, bool as_rational2) : as_rational(as_rational2)
 {
     assert(this->sol.size() == 0);
     assert(this->basis.size() == 0);
@@ -48,7 +48,7 @@ Solution::Solution(Tableau &t)
     this->solve(t);
 }
 
-Solution::Solution(Tableau &t, Solution &aux_sol)
+Solution::Solution(Tableau &t, Solution &aux_sol, bool as_rational2) : as_rational(as_rational2)
 {
     assert(this->sol.size() == 0);
     assert(this->basis.size() == 0);
@@ -105,25 +105,50 @@ void Solution::print_inv_cert(std::ostream &out)
 {
     assert(this->cert.size() == this->basis.size());
     for (int i = 0; i < this->cert.size() - 1; i++)
-        out << this->cert[i].get_d() << " ";
-    out << this->cert[this->cert.size() - 1].get_d() << std::endl;
+        if(!this->as_rational)
+            out << this->cert[i].get_d() << " ";
+        else
+            out << this->cert[i].get_str() << " ";
+    if(!this->as_rational)
+        out << this->cert[this->cert.size() - 1].get_d() << std::endl;
+    else
+        out << this->cert[this->cert.size() - 1].get_str() << std::endl;
 }
 
 std::ostream &operator<<(std::ostream &out, Solution &s)
 {
     if (s.infinite)
         out << "ilimitada" << std::endl;
-    else
-        out << "otima" << std::endl
-            << s.solval.get_d() << std::endl;
+    else{
+        if(!s.as_rational)
+            out << "otima" << std::endl << s.solval.get_d() << std::endl;
+        else
+            out << "otima" << std::endl << s.solval.get_str() << std::endl;
+    }
 
     for (int i = 0; i < s.sol.size() - 1; i++)
-        out << s.sol[i].get_d() << " ";
-    out << s.sol[s.sol.size() - 1].get_d() << std::endl;
+        if(!s.as_rational)
+            out << s.sol[i].get_d() << " ";
+        else
+            out << s.sol[i].get_str() << " ";
+            
+    if(!s.as_rational)
+        out << s.sol[s.sol.size() - 1].get_d() << std::endl;
+    else
+        out << s.sol[s.sol.size() - 1].get_str() << std::endl;
+        
 
     for (int i = 0; i < s.cert.size() - 1; i++)
-        out << s.cert[i].get_d() << " ";
-    out << s.cert[s.cert.size() - 1].get_d() << std::endl;
+        if(!s.as_rational)
+            out << s.cert[i].get_d() << " ";
+        else
+            out << s.cert[i].get_str() << " ";
+            
+    if(!s.as_rational)
+        out << s.cert[s.cert.size() - 1].get_d() << std::endl;
+    else
+        out << s.cert[s.cert.size() - 1].get_str() << std::endl;
+        
     return out;
 }
 
@@ -242,7 +267,7 @@ void Solution::optim(Tableau &t)
     this->solval = -this->solval;
     assert(this->cert.size());
     for (int i = 0; i < this->cert.size(); i++)
-        this->cert[i] = -this->cert[i]*(1-2*t.invs[i+1]);
+        this->cert[i] = -this->cert[i] * (1 - 2 * t.invs[i + 1]);
     // std::cout << "Cert: " << std::endl;
     // for(int i = 0; i < this->cert.size(); i++)
     //     std::cout << this->cert[i].get_str() << std::endl;
@@ -250,12 +275,13 @@ void Solution::optim(Tableau &t)
     // for(int i = 0; i < t.rems.size(); i++)
     //     std::cout << t.rems[i] << std::endl;
 
-    this->cert.resize(this->cert.size()+t.rems.size());
-    for (int i = 0; i < t.rems.size(); i++) {
+    this->cert.resize(this->cert.size() + t.rems.size());
+    for (int i = 0; i < t.rems.size(); i++)
+    {
         // rems values are "1-based"
         for (int j = t.rems[i]; j < this->cert.size(); j++)
-            this->cert[j] = this->cert[j-1];
-        this->cert[t.rems[i]-1] = 0;
+            this->cert[j] = this->cert[j - 1];
+        this->cert[t.rems[i] - 1] = 0;
     }
 }
 
