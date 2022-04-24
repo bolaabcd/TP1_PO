@@ -68,10 +68,10 @@ Solution::Solution(Tableau &t, Solution &aux_sol)
     this->sol = aux_sol.sol;
     this->basis = aux_sol.basis;
 
-    this->sol.resize(t.n);
+    this->sol.resize(t.m);
 
-    this->viab_cert.resize(t.get_n());
-    this->inv_cert.resize(t.get_n());
+    this->viab_cert.resize(t.n);
+    this->inv_cert.resize(t.n);
 
     this->solve(t);
 }
@@ -201,7 +201,7 @@ void Solution::ilim(int negvar, Tableau &t)
 
     assert(this->viab_cert.size() == t.m);
     for (int i = 0; i < this->basis.size(); i++)
-        this->viab_cert[this->basis[i]] = this->sol[i];
+        this->viab_cert[this->basis[i]] = this->sol[this->basis[i]];
 
     assert(this->viab_cert[negvar] <= 0);
     this->viab_cert[negvar] = 1;
