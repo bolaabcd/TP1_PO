@@ -189,10 +189,32 @@ bool Tableau::rem_extra(std::ostream &out)
                 if (j == this->m)
                 {
                     out << "inviavel" << std::endl;
-                    tmp[i - 1] = 1;
-                    for (int k = 0; k < tmp.size() - 1; k++)
-                        out << tmp[k].get_d() << " ";
-                    out << tmp.back().get_d() << std::endl;
+                    tmp.clear();
+                    tmp.resize(this->tab.size()-1);
+                    Tableau copy2(*this);
+                    for(int k = 0; k < this->m+1; k++)
+                        copy2.tab[0][k] = this->tab[i][k];
+                    for(int k = 1; k < this->n+1; k++)
+                        for(int r = 0; r < this->m+1; r++)
+                            if(k == i && r == j) {
+                                int posit = copy2.tab[k][r] > 0;
+                                posit = posit*2-1;
+                                assert(tmp[i-1] == 0);
+                                tmp[i-1] = 1;
+                                for (int k2 = 0; k2 < tmp.size() - 1; k2++)
+                                    out << tmp[k2].get_d()*posit << " ";
+                                out << tmp.back().get_d()*posit << std::endl;
+                            } else if(copy2.tab[k][r] != 0){
+                                if(r == j)
+                                    std::cout << i << " " << j << " " << k << " "<< r << std::endl;
+                                copy2.makeone(k,r,tmp);
+                                break;
+                            }
+                            
+                    // tmp[i - 1] = 1;
+                    // for (int k = 0; k < tmp.size() - 1; k++)
+                    //     out << tmp[k].get_d() << " ";
+                    // out << tmp.back().get_d() << std::endl;
                     return false;
                 }
                 remthis = false;

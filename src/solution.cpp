@@ -105,8 +105,8 @@ void Solution::print_inv_cert(std::ostream &out)
 {
     assert(this->cert.size() == this->basis.size());
     for (int i = 0; i < this->cert.size() - 1; i++)
-        out << -this->cert[i].get_d() << " ";
-    out << -this->cert[this->cert.size() - 1].get_d() << std::endl;
+        out << this->cert[i].get_d() << " ";
+    out << this->cert[this->cert.size() - 1].get_d() << std::endl;
 }
 
 std::ostream &operator<<(std::ostream &out, Solution &s)
