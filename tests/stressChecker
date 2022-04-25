@@ -1,0 +1,26 @@
+#!/bin/bash
+if test -z $1 || test ! -f "$1.cpp"
+    then echo 'O primeiro parametro deve ser o programa C++ (sem extensao) a verificar.'
+elif test -z $2 || test ! -f $2
+    then echo 'O segundo parametro deve ser o arquivo C++ (sem extensao) que gera uma entrada dado uma seed na linha de comando.'
+elif test -z $3 || test ! -f "$3.cpp"
+    then echo 'O terceiro parametro deve ser o programa C++ (sem extensao) que verifica se o primeiro argumento resulta no segundo.'
+else
+    # make $1 $2 $3 || exit 1
+    for ((i = 1; ; i++)) do
+	    ./$2 $i > in
+	    ./$1 < in > "$1out"
+	    if (! ./$3 "in" "$1out") then
+		    echo "--> entrada:"
+		    cat in
+		    echo "--> saida1:"
+		    cat "$1out"
+		    break;
+	    fi
+	    echo $i
+    done
+fi
+
+#$1 eh o programa a verificar
+#$2 eh o gerador
+#$3 eh o checador (por arquivo)
