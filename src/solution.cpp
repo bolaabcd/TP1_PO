@@ -337,7 +337,7 @@ void Solution::ilim(int negvar, Tableau &t)
 
 void Solution::optim(Tableau &t, bool is_aux)
 {
-    if (is_aux) {
+    if (is_aux && this->solval == 0) {
         assert(this->basis.size() == t.n);
         for (int i = 0; i < t.n; i++) {
             if (this->basis[i] >= t.m - t.n) {
