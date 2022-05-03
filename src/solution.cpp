@@ -331,6 +331,8 @@ void Solution::ilim(int negvar, Tableau &t)
     assert(infcert[negvar] <= 0);
     infcert[negvar] = 1;
     this->cert[0] = infcert;
+    this->cert[0].resize(t.m - t.n);
+    this->sol.resize(t.m - t.n);
 }
 
 void Solution::optim(Tableau &t, bool is_aux)
@@ -418,6 +420,9 @@ void Solution::optim(Tableau &t, bool is_aux)
             this->cert[0][j] = this->cert[0][j - 1];
         this->cert[0][t.rems[i] - 1] = 0;
     }
+
+    if(!is_aux)
+        this->sol.resize(t.m - t.n);
 }
 
 Solution::~Solution()
