@@ -11,7 +11,7 @@ class Tableau
     public:
         Tableau(int n, int m);
         void read(std::istream &in);
-        void get_auxiliar(Tableau &aux);
+        void get_auxiliar(Tableau &aux, bool first);
         int get_n();
         int get_m();
         void makeone(int lin, int col, std::vector<std::vector<mpq_class>> &viab_cert);

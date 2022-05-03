@@ -20,10 +20,10 @@ class Solution
         bool infinite;
         bool as_rational;
         mpq_class solval;
-        void solve(Tableau &t);
+        void solve(Tableau &t, bool is_aux);
         void canon(Tableau &t);
         void ilim(int negvar, Tableau &t);
-        void optim(Tableau &t);
+        void optim(Tableau &t, bool is_aux);
         std::vector<mpq_class> sol;
         std::vector<std::vector<mpq_class>> cert;
         std::vector<int> basis;

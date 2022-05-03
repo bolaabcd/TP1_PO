@@ -38,7 +38,7 @@ void Tableau::read(std::istream &in)
     this->invs.resize(this->n + 1, false);
 }
 
-void Tableau::get_auxiliar(Tableau &aux)
+void Tableau::get_auxiliar(Tableau &aux, bool first)
 {
     assert(this->n > 0);
     assert(this->m > 0);
@@ -56,11 +56,13 @@ void Tableau::get_auxiliar(Tableau &aux)
             aux.tab[i][j] = this->tab[i][j];
         if (i == 0)
         {
-            for (int j = 0; j < mc; j++)
-                aux.tab[i][j] = 0;
-            for (int j = mc; j < mc + nc; j++)
-                aux.tab[i][j] = -1;
-            aux.tab[i][mc + nc] = 0;
+            if(first){
+                for (int j = 0; j < mc; j++)
+                    aux.tab[i][j] = 0;
+                for (int j = mc; j < mc + nc; j++)
+                    aux.tab[i][j] = -1;
+                aux.tab[i][mc + nc] = 0;
+            }
         }
         else
         {

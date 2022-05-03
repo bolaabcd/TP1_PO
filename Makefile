@@ -17,17 +17,27 @@ OBJ_FILES = $(OBJ_FOLDER)/main.o $(OBJ_FOLDER)/tableau.o $(OBJ_FOLDER)/solution.
 build: $(TARGET)
 
 $(TARGET): $(OBJ_FILES)
+	mkdir -p obj
+	mkdir -p bin
 	$(CC) -o $(TARGET) $(DBGLFLAGS) $(LIBS) $(OBJ_FILES)
 
 $(OBJ_FOLDER)/main.o: $(HDR_FILES) $(SRC_FOLDER)/main.cpp
+	mkdir -p obj
+	mkdir -p bin
 	$(CC) $(DBGFLAGS) -o $(OBJ_FOLDER)/main.o $(SRC_FOLDER)/main.cpp 
 
 $(OBJ_FOLDER)/tableau.o: $(HDR_FILES) $(SRC_FOLDER)/tableau.cpp
+	mkdir -p obj
+	mkdir -p bin
 	$(CC) $(DBGFLAGS) -o $(OBJ_FOLDER)/tableau.o $(SRC_FOLDER)/tableau.cpp 
 
 $(OBJ_FOLDER)/solution.o: $(HDR_FILES) $(SRC_FOLDER)/solution.cpp
+	mkdir -p obj
+	mkdir -p bin
 	$(CC) $(DBGFLAGS) -o $(OBJ_FOLDER)/solution.o $(SRC_FOLDER)/solution.cpp
 
 clean:
+	mkdir -p obj
+	mkdir -p bin
 	rm $(TARGET) $(OBJ_FILES)
 

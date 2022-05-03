@@ -47,7 +47,7 @@ Solution::Solution(Tableau &t, bool as_rational2) : as_rational(as_rational2)
     for (int i = 1; i < n + 1; i++)
         this->cert[i][i - 1] = 1;
 
-    this->solve(t);
+    this->solve(t, true);
 }
 
 Solution::Solution(Tableau &t, Solution &aux_sol, bool as_rational2) : as_rational(as_rational2)
@@ -77,12 +77,44 @@ Solution::Solution(Tableau &t, Solution &aux_sol, bool as_rational2) : as_ration
         assert(aux_sol.sol[t.m + i] == 0);
     }
 
+    std::vector<int> out_of_basis;
+
     assert(aux_sol.basis.size() == t.n);
     for (int i = 0; i < t.n; i++)
     {
         assert(aux_sol.basis[i] >= 0);
-        assert(aux_sol.basis[i] < t.m);
+        // assert(aux_sol.basis[i] < t.m);
+        if (aux_sol.basis[i] >= t.m) {
+            // Conclusao que tirei: tableau da auxiliar temq ter 0 em b na linha i
+            out_of_basis.push_back(i);
+        }
     }
+    // // don't know if this really works:
+    // while(out_of_basis.size() > 0) {
+    //     int sant = out_of_basis.size();
+
+    //     int ob = out_of_basis.back();
+
+    //     for (int i = 0; i < t.m; i++) {
+    //         if (aux_sol.sol[i] == 0) {
+    //             bool liberado = true;
+    //             for (int j = 0; j < t.n; j++) {
+    //                 if (aux_sol.basis[j] == i) {
+    //                     liberado = false;
+    //                     break;
+    //                 }
+    //             }
+    //             if (liberado) {
+    //                 out_of_basis.pop_back();
+    //                 aux_sol.basis[ob] = i;
+    //                 break;
+    //             }
+    //         }
+    //     }
+    //     assert(sant > out_of_basis.size());
+    // }
+        
+
 
     this->sol = aux_sol.sol;
     this->basis = aux_sol.basis;
@@ -93,7 +125,22 @@ Solution::Solution(Tableau &t, Solution &aux_sol, bool as_rational2) : as_ration
     for (int i = 1; i < t.n + 1; i++)
         this->cert[i][i - 1] = 1;
 
-    this->solve(t);
+    // std::cout << "POSTAUX2" << std::endl;
+    // std::cout << aux_sol.solval.get_str() << std::endl;
+    // for (int i = 0; i < t.n + t.m; i++)
+    // {
+    //     std::cout << aux_sol.sol[i].get_str() << " ";
+    // }
+    // std::cout << std::endl;
+    // std::cout << "basis_post:" << std::endl;
+    // for (int i = 0; i < t.n; i++)
+    // {
+    //     std::cout << aux_sol.basis[i] << " ";
+    // }
+    // std::cout << std::endl;
+    // t.print_tab();
+
+    this->solve(t, false);
 }
 
 bool Solution::is_zero()
@@ -159,7 +206,7 @@ std::ostream &operator<<(std::ostream &out, Solution &s)
     return out;
 }
 
-void Solution::solve(Tableau &t)
+void Solution::solve(Tableau &t, bool is_aux)
 {
     assert(t.m >= t.n);
     // t.print_tab();
@@ -184,7 +231,7 @@ void Solution::solve(Tableau &t)
     // }
     // std::cout << std::endl;
 
-    for (int i = 0; i < t.n; i++)
+    for (int i = 1; i < t.n; i++) // checking if b is positive
         assert(t.tab[i][t.m] >= 0);
 
     // rewrite in canonical form
@@ -193,6 +240,14 @@ void Solution::solve(Tableau &t)
 
     // std::cout << "POSTCANON:" << std::endl;
     // t.print_tab();
+    // std::cout << "CERTIFICATE_POSTCANON: " << std::endl;
+    // for (int i = 0; i < this->cert.size(); i++)
+    // {
+    //     for (int j = 0; j < this->cert[i].size(); j++)
+    //         std::cout << this->cert[i][j].get_str() << " ";
+    //     std::cout << std::endl;
+    // }
+    // std::cout << std::endl;
 
     for (int i = 1; i < t.n; i++)
         assert(t.tab[i][t.m] >= 0);
@@ -233,7 +288,7 @@ void Solution::solve(Tableau &t)
                 assert(this->sol[this->basis[maxii]] == 0);
                 // this->sol[this->basis[maxii]] = 0;
                 this->basis[maxii] = j;
-                this->solve(t);
+                this->solve(t, is_aux);
                 return;
             }
 
@@ -242,7 +297,7 @@ void Solution::solve(Tableau &t)
             return;
         }
     // if didn't find positive c, it's already optimal
-    this->optim(t);
+    this->optim(t, is_aux);
 }
 
 void Solution::canon(Tableau &t)
@@ -278,8 +333,70 @@ void Solution::ilim(int negvar, Tableau &t)
     this->cert[0] = infcert;
 }
 
-void Solution::optim(Tableau &t)
+void Solution::optim(Tableau &t, bool is_aux)
 {
+    if (is_aux) {
+        assert(this->basis.size() == t.n);
+        for (int i = 0; i < t.n; i++) {
+            if (this->basis[i] >= t.m - t.n) {
+                // std::cout << "MAKING IT A GOOD OPTIMAL: " << std::endl;
+                // std::cout << i << std::endl;
+
+                int maxjj = -1 ;
+                mpq_class maxj;
+                // assert(t.tab[0].size() == t.m);
+                for (int j = 0; j < t.m - t.n; j++) {
+                    if(this->sol[j] != 0 || t.tab[i+1][j] == 0)// t.tab[0][j] == 0 || 
+                        continue;
+                    assert(t.tab[0][j] < 0);
+                    mpq_class div = t.tab[0][j] / t.tab[i+1][j];
+                    if (maxjj == -1 || div > maxj) {
+                        maxjj = j;
+                        maxj = div;
+                    }
+                }
+                // std::cout << "maxj " << maxjj << std::endl;
+                assert(maxjj != -1);
+                // now we remove this->basis[i] from the basis and add maxjj
+                assert(t.tab[i+1].back() == 0);
+                // for (int i2 = 0; i2 < t.m; i2++)
+                // {
+                //     //this->sol[this->basis[i2]] -= maxj * t.tab[i2 + 1][j];
+                //     this->sol[i2] -= maxj * t.tab[i+1][i2];
+                // }
+                // this->sol[j] = maxi;
+                // assert(this->sol[this->basis[maxii]] == 0);
+                // this->sol[this->basis[maxii]] = 0;
+                this->basis[i] = maxjj;
+                // this->solve(t, is_aux);
+                t.makeone(i+1,maxjj,this->cert);
+
+
+                // t.print_tab();
+                // std::cout << "SOL: " << std::endl;
+                // for (int iii = 0; iii < this->sol.size(); iii++)
+                // {
+                //     std::cout << this->sol[iii].get_str() << " ";
+                // }
+                // std::cout << std::endl;
+                // std::cout << "BASIS: " << std::endl;
+                // for (int iii = 0; iii < this->basis.size(); iii++)
+                // {
+                //     std::cout << this->basis[iii] << " ";
+                // }
+                // std::cout << std::endl;
+                // std::cout << "CERTIFICATE: " << std::endl;
+                // for (int iii = 0; iii < this->cert.size(); iii++)
+                // {
+                //     for (int jjj = 0; jjj < this->cert[i].size(); jjj++)
+                //         std::cout << this->cert[iii][jjj].get_str() << " ";
+                //     std::cout << std::endl;
+                // }
+                // std::cout << std::endl;
+            }
+        }
+    }
+
     this->infinite = false;
     this->solval = -this->solval;
     assert(this->cert.size());
