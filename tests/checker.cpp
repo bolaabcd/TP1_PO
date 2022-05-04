@@ -17,10 +17,16 @@ vector<vector<mpq_class>> A;
 
 int n, m;
 
+void sum_prod(vector<mpq_class> &result, vector<mpq_class> &vec, mpq_class mult) {
+    // result += vec * mult
+    // assert(result.size() == vec.size()); // isso eh falso pq o certificado eh incompleto
+    for (int i = 0; i < result.size(); i++)
+        result[i] += vec[i] * mult;
+}
 
 void invi(ifstream &inp) {
-    vector<mpq_class> yta(m, 0);
     mpq_class fb = 0;
+    vector<mpq_class> result(m, 0);
 
     for (int i = 0; i < n; i++)
     {
@@ -28,11 +34,15 @@ void invi(ifstream &inp) {
         string s;
         inp >> s;
         cval.set_str(s, 10);
-        //sum_prod(yta,A[i],cval);
+        sum_prod(result,A[i],cval);
+
         fb += cval * b[i];
     }
 
     assert(fb < 0);
+
+    for(mpq_class &i : result)
+        assert(i >= 0);
 
 }
 
@@ -63,7 +73,7 @@ int main(int argc, char **argv)
 
     for (int i = 0; i < n; i++)
         for (int j = 0; j < m+1; j++)
-            if (j == m + 1)
+            if (j == m)
             {
                 string s;
                 in >> s;
