@@ -303,12 +303,24 @@ void Solution::solve(Tableau &t, bool is_aux)
 void Solution::canon(Tableau &t)
 {
     assert(this->basis.size() == t.n);
-    for (int i = 0; i < t.n; i++)
-    {
-        // make this line and column be one by gaussian elimination. cert is used to update
-        // the optmality certification.
-        t.makeone(i + 1, this->basis[i], this->cert);
-        // this may cause problems. Think about it later, if it's impossible to do it in some case.
+    std::vector<bool> marc(t.n,false);
+    bool entrou = true;
+    while(entrou) {
+        entrou = false;
+        for (int i = 0; i < t.n; i++)
+        {
+            if(!marc[i] && t.tab[i+1][this->basis[i]] != 0){
+                marc[i] = true;
+                entrou = true;
+                // make this line and column be one by gaussian elimination. cert is used to update
+                // the optmality certification.
+                // std::cout << "Inside canon" << std::endl;
+                // std::cout << i+1 << " " << this->basis[i] << std::endl;
+                // t.print_tab();
+                t.makeone(i + 1, this->basis[i], this->cert);
+                // this may cause problems. Think about it later, if it's impossible to do it in some case.
+            }
+        }
     }
 }
 
@@ -339,62 +351,92 @@ void Solution::optim(Tableau &t, bool is_aux)
 {
     if (is_aux && this->solval == 0) {
         assert(this->basis.size() == t.n);
-        for (int i = 0; i < t.n; i++) {
-            if (this->basis[i] >= t.m - t.n) {
-                // std::cout << "MAKING IT A GOOD OPTIMAL: " << std::endl;
-                // std::cout << i << std::endl;
+        bool entrou = true;
+        while (entrou){
+            entrou = false;
+            for (int i = 0; i < t.n; i++) {
+                if (this->basis[i] >= t.m - t.n) {
+                    entrou = true;
+                    // std::cout << "MAKING IT A GOOD OPTIMAL: " << std::endl;
+                    // std::cout << i << std::endl;
 
-                int maxjj = -1 ;
-                mpq_class maxj;
-                // assert(t.tab[0].size() == t.m);
-                for (int j = 0; j < t.m - t.n; j++) {
-                    if(this->sol[j] != 0 || t.tab[i+1][j] == 0)// t.tab[0][j] == 0 || 
-                        continue;
-                    assert(t.tab[0][j] < 0);
-                    mpq_class div = t.tab[0][j] / t.tab[i+1][j];
-                    if (maxjj == -1 || div > maxj) {
-                        maxjj = j;
-                        maxj = div;
+                    int maxjj = -1 ;
+                    mpq_class maxj;
+                    // assert(t.tab[0].size() == t.m);
+                    for (int j = 0; j < t.m - t.n; j++) {
+                        if(this->sol[j] != 0 || t.tab[i+1][j] == 0)// t.tab[0][j] == 0 || 
+                            continue;
+                        assert(t.tab[0][j] < 0);
+                        mpq_class div = t.tab[0][j] / t.tab[i+1][j];
+                        if (maxjj == -1 || div > maxj) {
+                            maxjj = j;
+                            maxj = div;
+                        }
                     }
+                    // std::cout << "maxj " << maxjj << std::endl;
+                    assert(maxjj != -1);
+                    // now we remove this->basis[i] from the basis and add maxjj
+                    assert(t.tab[i+1].back() == 0);
+                    // for (int i2 = 0; i2 < t.m; i2++)
+                    // {
+                    //     //this->sol[this->basis[i2]] -= maxj * t.tab[i2 + 1][j];
+                    //     this->sol[i2] -= maxj * t.tab[i+1][i2];
+                    // }
+                    // this->sol[j] = maxi;
+                    // assert(this->sol[this->basis[maxii]] == 0);
+                    // this->sol[this->basis[maxii]] = 0;
+                    this->basis[i] = maxjj;
+                    // this->solve(t, is_aux);
+
+                    // std::cout << "PRE_MAKEONE" << std::endl;
+                    // std::cout << i << " " << this->basis[i] << " " << maxjj << " " << maxj.get_str() << std::endl;
+                    // t.print_tab();
+                    // std::cout << "SOL: " << std::endl;
+                    // for (int iii = 0; iii < this->sol.size(); iii++)
+                    // {
+                    //     std::cout << this->sol[iii].get_str() << " ";
+                    // }
+                    // std::cout << std::endl;
+                    // std::cout << "BASIS: " << std::endl;
+                    // for (int iii = 0; iii < this->basis.size(); iii++)
+                    // {
+                    //     std::cout << this->basis[iii] << " ";
+                    // }
+                    // std::cout << std::endl;
+                    // std::cout << "CERTIFICATE: " << std::endl;
+                    // for (int iii = 0; iii < this->cert.size(); iii++)
+                    // {
+                    //     for (int jjj = 0; jjj < this->cert[i].size(); jjj++)
+                    //         std::cout << this->cert[iii][jjj].get_str() << " ";
+                    //     std::cout << std::endl;
+                    // }
+                    // std::cout << std::endl;
+
+                    t.makeone(i+1,maxjj,this->cert);
+
+
+                    // t.print_tab();
+                    // std::cout << "SOL: " << std::endl;
+                    // for (int iii = 0; iii < this->sol.size(); iii++)
+                    // {
+                    //     std::cout << this->sol[iii].get_str() << " ";
+                    // }
+                    // std::cout << std::endl;
+                    // std::cout << "BASIS: " << std::endl;
+                    // for (int iii = 0; iii < this->basis.size(); iii++)
+                    // {
+                    //     std::cout << this->basis[iii] << " ";
+                    // }
+                    // std::cout << std::endl;
+                    // std::cout << "CERTIFICATE: " << std::endl;
+                    // for (int iii = 0; iii < this->cert.size(); iii++)
+                    // {
+                    //     for (int jjj = 0; jjj < this->cert[i].size(); jjj++)
+                    //         std::cout << this->cert[iii][jjj].get_str() << " ";
+                    //     std::cout << std::endl;
+                    // }
+                    // std::cout << std::endl;
                 }
-                // std::cout << "maxj " << maxjj << std::endl;
-                assert(maxjj != -1);
-                // now we remove this->basis[i] from the basis and add maxjj
-                assert(t.tab[i+1].back() == 0);
-                // for (int i2 = 0; i2 < t.m; i2++)
-                // {
-                //     //this->sol[this->basis[i2]] -= maxj * t.tab[i2 + 1][j];
-                //     this->sol[i2] -= maxj * t.tab[i+1][i2];
-                // }
-                // this->sol[j] = maxi;
-                // assert(this->sol[this->basis[maxii]] == 0);
-                // this->sol[this->basis[maxii]] = 0;
-                this->basis[i] = maxjj;
-                // this->solve(t, is_aux);
-                t.makeone(i+1,maxjj,this->cert);
-
-
-                // t.print_tab();
-                // std::cout << "SOL: " << std::endl;
-                // for (int iii = 0; iii < this->sol.size(); iii++)
-                // {
-                //     std::cout << this->sol[iii].get_str() << " ";
-                // }
-                // std::cout << std::endl;
-                // std::cout << "BASIS: " << std::endl;
-                // for (int iii = 0; iii < this->basis.size(); iii++)
-                // {
-                //     std::cout << this->basis[iii] << " ";
-                // }
-                // std::cout << std::endl;
-                // std::cout << "CERTIFICATE: " << std::endl;
-                // for (int iii = 0; iii < this->cert.size(); iii++)
-                // {
-                //     for (int jjj = 0; jjj < this->cert[i].size(); jjj++)
-                //         std::cout << this->cert[iii][jjj].get_str() << " ";
-                //     std::cout << std::endl;
-                // }
-                // std::cout << std::endl;
             }
         }
     }
