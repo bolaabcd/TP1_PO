@@ -50,6 +50,19 @@ void ilim(ifstream &inp) {
     mpq_class fc = 0;
     vector<mpq_class> result(m, 0);
 
+    vector<mpq_class> solv(n, 0);
+    for (int i = 0; i < m; i++) {
+        mpq_class sval;
+        string s;
+        inp >> s;
+        sval.set_str(s, 10);
+        assert(sval >= 0); // x >= 0
+        sum_prod(solv, At[i], sval);
+    }
+
+    for(int i = 0; i < n; i++)
+        assert(solv[i] <= b[i]); // Ax <= b
+
     for (int i = 0; i < m; i++)
     {
         mpq_class cval;
@@ -58,13 +71,13 @@ void ilim(ifstream &inp) {
         cval.set_str(s, 10);
         sum_prod(result,At[i], cval);
 
-        assert(cval >= 0);
+        assert(cval >= 0); // db >= 0
         fc += cval * c[i];
     }
 
-    assert(fc > 0);
+    assert(fc > 0); // cT db > 0
     for (mpq_class &i : result)
-        assert(i == 0);
+        assert(i <= 0); // Adb <= 0
 }
 
 void otim(ifstream &inp) {
