@@ -1,24 +1,16 @@
 #include "tableau.hpp"
 
-#include <assert.h>
 #include <vector>
 #include <gmpxx.h>
 #include <iostream>
 
 Tableau::Tableau(int nc, int mc) : n(nc), m(mc)
 {
-    assert(nc > 0);
-    assert(mc > 0);
     this->tab.resize(nc + 1, std::vector<mpq_class>(mc + 1));
 }
 
 void Tableau::read(std::istream &in)
 {
-    assert(in.good());
-    assert(this->n > 0);
-    assert(this->m > 0);
-    assert((int)this->tab.size() == this->n + 1);
-    assert((int)this->tab[0].size() == this->m + 1);
     for (int i = 0; i < this->n + 1; i++)
     {
         for (int j = 0; j < this->m + 1; j++)
@@ -33,21 +25,11 @@ void Tableau::read(std::istream &in)
             this->tab[i][j] = v;
         }
     }
-    assert(this->invs.size() == 0);
     this->invs.resize(this->n + 1, false);
 }
 
 void Tableau::get_auxiliar(Tableau &aux, bool first)
 {
-    assert(this->n > 0);
-    assert(this->m > 0);
-    assert((int)this->tab.size() == this->n + 1);
-    assert((int)this->tab[0].size() == this->m + 1);
-    assert(aux.n == this->n);
-    assert(aux.m == this->n + this->m);
-    assert((int)aux.tab.size() == aux.n + 1);
-    assert((int)aux.tab[0].size() == aux.m + 1);
-
     int k = 0, mc = this->m, nc = this->n;
     for (int i = 0; i < nc + 1; i++)
     {
@@ -67,7 +49,6 @@ void Tableau::get_auxiliar(Tableau &aux, bool first)
         {
             for (int j = mc; j < mc + nc; j++)
                 aux.tab[i][j] = 0;
-            assert(k < nc);
             aux.tab[i][mc + k++] = 1;
             aux.tab[i][mc + nc] = this->tab[i][mc];
         }
@@ -88,18 +69,6 @@ int Tableau::get_m()
 
 void Tableau::makeone(int lin, int col, std::vector<std::vector<mpq_class>> &viab_cert)
 {
-    assert(this->n > 0);
-    assert(this->m > 0);
-    assert((int)this->tab.size() == this->n + 1);
-    assert((int)this->tab[0].size() == this->m + 1);
-    assert(viab_cert.size() == this->tab.size());
-    assert(viab_cert[0].size() == this->tab.size() - 1);
-    assert(lin > 0);
-    assert(col < this->m);
-    assert(this->tab[lin][col] != 0);
-    assert(!this->invs[0]);
-
-    assert(mpq_sgn(this->tab[lin][col].get_mpq_t()));
     this->div(viab_cert[lin], this->tab[lin][col]);
     this->div(this->tab[lin], this->tab[lin][col]); // first /= val
     
@@ -114,21 +83,12 @@ void Tableau::makeone(int lin, int col, std::vector<std::vector<mpq_class>> &via
 
 void Tableau::div(std::vector<mpq_class> &first, mpq_class val)
 {
-    assert(this->n > 0);
-    assert(this->m > 0);
-    assert((int)this->tab.size() == this->n + 1);
-    assert((int)this->tab[0].size() == this->m + 1);
     for (int i = 0; i < (int)first.size(); i++)
         first[i] = first[i] / val;
 }
 
 void Tableau::sub(std::vector<mpq_class> &first, std::vector<mpq_class> &second, mpq_class val)
 {
-    assert(this->n > 0);
-    assert(this->m > 0);
-    assert((int)this->tab.size() == this->n + 1);
-    assert((int)this->tab[0].size() == this->m + 1);
-    assert(second.size() == first.size());
     for (int i = 0; i < (int)first.size(); i++)
     {
         first[i] -= second[i] * val;
@@ -208,7 +168,6 @@ bool Tableau::rem_extra(std::ostream &out, bool as_rational)
     {
         if (j < (int)this->rems.size() && i == this->rems[j])
         {
-            assert(this->rems[j] > 0);
             j++;
         }
         else
@@ -218,7 +177,6 @@ bool Tableau::rem_extra(std::ostream &out, bool as_rational)
             ni++;
         }
     }
-    assert(j == (int)this->rems.size());
     for (int i = 0; i < this->m + 1; i++)
         tab2[0][i] = tab[0][i];
     this->n = newn;

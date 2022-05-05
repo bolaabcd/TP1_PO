@@ -1,6 +1,5 @@
 #include <iostream>
 #include <vector>
-#include <assert.h>
 #include <string.h>
 #include "solution.hpp"
 #include "tableau.hpp"
@@ -21,8 +20,6 @@ int main(int argc, char **argv)
 
     tableau.positive_b();
 
-    assert(tableau.get_n() == n);
-    assert(tableau.get_m() == n + m);
     n = tableau.get_n();
     m = tableau.get_m();
     Tableau aux(n, m + n);

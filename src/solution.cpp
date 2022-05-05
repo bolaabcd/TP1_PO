@@ -2,17 +2,12 @@
 #include "tableau.hpp"
 #include <vector>
 #include <gmpxx.h>
-#include <assert.h>
 #include <iostream>
 
 Solution::Solution(Tableau &t, bool as_rational2) : as_rational(as_rational2)
 {
-    assert(this->sol.size() == 0);
-    assert(this->basis.size() == 0);
-
     int n = t.get_n();
     int m = t.get_m() - n; // this m is the auxiliar number of columns
-    assert(m > 0);
     this->sol.resize(m + n);
     for (int i = 0; i < m; i++)
         this->sol[i] = 0;
@@ -40,8 +35,6 @@ Solution::Solution(Tableau &t, bool as_rational2) : as_rational(as_rational2)
     for (int i = 0; i < n; i++)
         if (valid[i])
             this->basis[i] = m + i;
-        else
-            assert(t.tab[i + 1][m] == 0);
 
     this->cert.resize(n + 1, std::vector<mpq_class>(n, 0));
     for (int i = 1; i < n + 1; i++)
@@ -52,25 +45,6 @@ Solution::Solution(Tableau &t, bool as_rational2) : as_rational(as_rational2)
 
 Solution::Solution(Tableau &t, Tableau &auxt, Solution &aux_sol, bool as_rational2) : as_rational(as_rational2)
 {
-    assert(this->sol.size() == 0);
-    assert(this->basis.size() == 0);
-
-    assert((int)aux_sol.sol.size() == t.m + t.n);
-    for (int i = 0; i < t.n; i++)
-    {
-        assert(aux_sol.sol[t.m + i] == 0);
-    }
-
-
-    assert((int)aux_sol.basis.size() == t.n);
-    for (int i = 0; i < t.n; i++)
-    {
-        assert(aux_sol.basis[i] >= 0);
-    }
-
-    assert(t.n == auxt.n);
-    assert(t.m + t.n == auxt.m);
-
     for (int i = 1; i < t.n + 1; i++) {
         t.tab[i][t.m] = auxt.tab[i][t.m + t.n];
     }
@@ -94,16 +68,11 @@ Solution::Solution(Tableau &t, Tableau &auxt, Solution &aux_sol, bool as_rationa
 
 bool Solution::is_zero()
 {
-    assert(this->sol.size() != 0);
-    assert(this->basis.size() != 0);
-    assert(this->cert.size() != 0);
-    assert(this->cert[0].size() != 0);
     return !mpq_sgn(this->solval.get_mpq_t());
 }
 
 void Solution::print_inv_cert(std::ostream &out)
 {
-    assert(this->cert[0].size() == this->basis.size());
     for (int i = 0; i < (int)this->cert[0].size() - 1; i++)
         if (!this->as_rational)
             out << this->cert[0][i].get_d() << " ";
@@ -156,17 +125,9 @@ std::ostream &operator<<(std::ostream &out, Solution &s)
 
 void Solution::solve(Tableau &t, bool is_aux)
 {
-    assert(t.m >= t.n);
-
-    for (int i = 1; i < t.n; i++) // checking if b is positive
-        assert(t.tab[i][t.m] >= 0);
-
     // rewrite in canonical form
     this->canon(t);
     this->solval = t.tab[0][t.m];
-
-    for (int i = 1; i < t.n; i++)
-        assert(t.tab[i][t.m] >= 0);
 
     for (int j = 0; j < t.m; j++)
         if (t.tab[0][j] > 0)
@@ -190,14 +151,12 @@ void Solution::solve(Tableau &t, bool is_aux)
             }
             if (maxii != -1) // maxii is r, k is j, at the pseudocode we saw in class
             {
-                assert((int)this->basis.size() == t.n);
                 // now we remove the maxii'th identity column and add column j.
                 for (int i = 0; i < t.n; i++)
                 {
                     this->sol[this->basis[i]] -= maxi * t.tab[i + 1][j];
                 }
                 this->sol[j] = maxi;
-                assert(this->sol[this->basis[maxii]] == 0);
                 this->basis[maxii] = j;
                 this->solve(t, is_aux);
                 return;
@@ -213,7 +172,6 @@ void Solution::solve(Tableau &t, bool is_aux)
 
 void Solution::canon(Tableau &t)
 {
-    assert((int)this->basis.size() == t.n);
     std::vector<bool> marc(t.n,false);
     bool entrou = true;
     while(entrou) {
@@ -230,25 +188,19 @@ void Solution::canon(Tableau &t)
             }
         }
     }
-    for(bool b: marc)
-        assert(b);
 }
 
 void Solution::ilim(int negvar, Tableau &t)
 {
-    assert(negvar >= 0);
-    assert(negvar < t.m);
     this->infinite = true;
     std::vector<mpq_class> infcert(t.m);
 
     for (int i = 0; i < t.m; i++)
         infcert[i] = 0;
 
-    assert((int)infcert.size() == t.m);
     for (int i = 0; i < (int)this->basis.size(); i++)
         infcert[this->basis[i]] = -t.tab[i + 1][negvar];
 
-    assert(infcert[negvar] <= 0);
     infcert[negvar] = 1;
     this->cert[0] = infcert;
     this->cert[0].resize(t.m - t.n);
@@ -258,7 +210,6 @@ void Solution::ilim(int negvar, Tableau &t)
 void Solution::optim(Tableau &t, bool is_aux)
 {
     if (is_aux && this->solval == 0) {
-        assert((int)this->basis.size() == t.n);
         bool entrou = true;
         while (entrou){
             entrou = false;
@@ -272,7 +223,6 @@ void Solution::optim(Tableau &t, bool is_aux)
                     for (int j = 0; j < t.m - t.n; j++) {
                         if(this->sol[j] != 0 || t.tab[i+1][j] == 0)// t.tab[0][j] == 0 || 
                             continue;
-                        assert(t.tab[0][j] < 0);
                         mpq_class div = t.tab[0][j] / t.tab[i+1][j];
                         if (maxjj == -1 || div > maxj) {
                             maxjj = j;
@@ -280,10 +230,7 @@ void Solution::optim(Tableau &t, bool is_aux)
                         }
                     }
 
-                    assert(maxjj != -1);
                     // now we remove this->basis[i] from the basis and add maxjj
-                    assert(t.tab[i+1].back() == 0);
-
                     this->basis[i] = maxjj;
 
                     t.makeone(i+1,maxjj,this->cert);
@@ -294,8 +241,6 @@ void Solution::optim(Tableau &t, bool is_aux)
 
     this->infinite = false;
     this->solval = -this->solval;
-    assert(this->cert.size());
-    assert(this->cert[0].size());
     for (int i = 0; i < (int)this->cert[0].size(); i++)
         this->cert[0][i] = -this->cert[0][i] * (1 - 2 * t.invs[i + 1]);
 
