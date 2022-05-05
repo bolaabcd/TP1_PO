@@ -19,7 +19,6 @@ int n, m;
 
 void sum_prod(vector<mpq_class> &result, vector<mpq_class> &vec, mpq_class mult) {
     // result += vec * mult
-    // assert(result.size() == vec.size()); // isso eh falso pq o certificado eh incompleto
     for (int i = 0; i < result.size(); i++)
         result[i] += vec[i] * mult;
 }

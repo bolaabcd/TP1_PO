@@ -5,13 +5,6 @@
 #include "solution.hpp"
 #include "tableau.hpp"
 
-// CHECK IF SOLUTION CANON MAKEONE WORKS: yes, if it's a basis it can be the identity
-// REMOVE ALL ASSERTS AFTER EVERYTHING IS CORRECT!!!!
-
-// TEST CYCLING EXAMPLES
-// ADD EXACT ANSWER OPTION
-// SEE IF ITS'S SLOW, AND IF SO MAKE SOLVE() NON-RECURSIVE
-
 int main(int argc, char **argv)
 {
     bool as_rational = false;
@@ -26,11 +19,8 @@ int main(int argc, char **argv)
     first_tableau.read(std::cin);
     first_tableau.get_auxiliar(tableau, false);
 
-    //if (!tableau.rem_extra(std::cout, as_rational))
-    //    return 0;
     tableau.positive_b();
 
-    //assert(tableau.get_m() == m);
     assert(tableau.get_n() == n);
     assert(tableau.get_m() == n + m);
     n = tableau.get_n();
