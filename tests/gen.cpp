@@ -14,7 +14,7 @@ int rand(int a, int b)
 int main(int argc, char **argv)
 {
     srand(atoi(argv[1]));
-    int n = rand(1, 10), m = rand(1, 10);
+    int n = rand(1, 50), m = rand(1, 50);
     cout << n << ' ' << m << endl;
 
     for (int i = 0; i < m; i++)

@@ -18,8 +18,8 @@ void Tableau::read(std::istream &in)
     assert(in.good());
     assert(this->n > 0);
     assert(this->m > 0);
-    assert(this->tab.size() == this->n + 1);
-    assert(this->tab[0].size() == this->m + 1);
+    assert((int)this->tab.size() == this->n + 1);
+    assert((int)this->tab[0].size() == this->m + 1);
     for (int i = 0; i < this->n + 1; i++)
     {
         for (int j = 0; j < this->m + 1; j++)
@@ -42,12 +42,12 @@ void Tableau::get_auxiliar(Tableau &aux, bool first)
 {
     assert(this->n > 0);
     assert(this->m > 0);
-    assert(this->tab.size() == this->n + 1);
-    assert(this->tab[0].size() == this->m + 1);
+    assert((int)this->tab.size() == this->n + 1);
+    assert((int)this->tab[0].size() == this->m + 1);
     assert(aux.n == this->n);
     assert(aux.m == this->n + this->m);
-    assert(aux.tab.size() == aux.n + 1);
-    assert(aux.tab[0].size() == aux.m + 1);
+    assert((int)aux.tab.size() == aux.n + 1);
+    assert((int)aux.tab[0].size() == aux.m + 1);
 
     int k = 0, mc = this->m, nc = this->n;
     for (int i = 0; i < nc + 1; i++)
@@ -99,8 +99,8 @@ void Tableau::makeone(int lin, int col, std::vector<std::vector<mpq_class>> &via
 {
     assert(this->n > 0);
     assert(this->m > 0);
-    assert(this->tab.size() == this->n + 1);
-    assert(this->tab[0].size() == this->m + 1);
+    assert((int)this->tab.size() == this->n + 1);
+    assert((int)this->tab[0].size() == this->m + 1);
     assert(viab_cert.size() == this->tab.size());
     assert(viab_cert[0].size() == this->tab.size() - 1);
     assert(lin > 0);
@@ -134,10 +134,10 @@ void Tableau::div(std::vector<mpq_class> &first, mpq_class val)
 {
     assert(this->n > 0);
     assert(this->m > 0);
-    assert(this->tab.size() == this->n + 1);
-    assert(this->tab[0].size() == this->m + 1);
+    assert((int)this->tab.size() == this->n + 1);
+    assert((int)this->tab[0].size() == this->m + 1);
     // assert(first.size() == this->m + 1);//this was before the certificate
-    for (int i = 0; i < first.size(); i++)
+    for (int i = 0; i < (int)first.size(); i++)
         first[i] = first[i] / val;
 }
 
@@ -145,11 +145,11 @@ void Tableau::sub(std::vector<mpq_class> &first, std::vector<mpq_class> &second,
 {
     assert(this->n > 0);
     assert(this->m > 0);
-    assert(this->tab.size() == this->n + 1);
-    assert(this->tab[0].size() == this->m + 1);
+    assert((int)this->tab.size() == this->n + 1);
+    assert((int)this->tab[0].size() == this->m + 1);
     assert(second.size() == first.size());
     // assert(first.size() == this->m + 1);
-    for (int i = 0; i < first.size(); i++)
+    for (int i = 0; i < (int)first.size(); i++)
     {
         // std::cout << i << "x" << first[this->m].get_str() <<"y" << second[this->m].get_str() << "z"
         // << val.get_str() << "ç";
@@ -186,7 +186,7 @@ void Tableau::positive_b()
 bool Tableau::rem_extra(std::ostream &out, bool as_rational)
 {
     std::vector<std::vector<mpq_class>> tmp(this->tab.size(), std::vector<mpq_class>(this->tab.size() - 1, 0));
-    for (int i = 1; i < this->tab.size(); i++)
+    for (int i = 1; i < (int)this->tab.size(); i++)
         tmp[i][i - 1] = 1;
 
     Tableau copy(*this);
@@ -243,7 +243,7 @@ bool Tableau::rem_extra(std::ostream &out, bool as_rational)
                     // tmp[i - 1] = 1;
                     int posit = copy.tab[i][j] < 0;
                     posit = posit * 2 - 1;
-                    for (int k = 0; k < tmp[i].size() - 1; k++)
+                    for (int k = 0; k < (int)tmp[i].size() - 1; k++)
                         if(!as_rational)
                             out << ((mpq_class)(posit*tmp[i][k])).get_d() << " ";
                         else
@@ -271,7 +271,7 @@ bool Tableau::rem_extra(std::ostream &out, bool as_rational)
     int j = 0;
     for (int i = 1, ni = 1; i < this->n + 1; i++)
     {
-        if (j < this->rems.size() && i == this->rems[j])
+        if (j < (int)this->rems.size() && i == this->rems[j])
         {
             assert(this->rems[j] > 0);
             j++;
@@ -283,7 +283,7 @@ bool Tableau::rem_extra(std::ostream &out, bool as_rational)
             ni++;
         }
     }
-    assert(j == this->rems.size());
+    assert(j == (int)this->rems.size());
     for (int i = 0; i < this->m + 1; i++)
         tab2[0][i] = tab[0][i];
     this->n = newn;

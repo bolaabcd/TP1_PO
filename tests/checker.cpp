@@ -46,10 +46,7 @@ void invi(ifstream &inp) {
 
 }
 
-void ilim(ifstream &inp) {
-    mpq_class fc = 0;
-    vector<mpq_class> result(m, 0);
-
+void checksol(ifstream &inp, mpq_class &expected, bool check_expected) {
     vector<mpq_class> solv(n, 0);
     for (int i = 0; i < m; i++) {
         mpq_class sval;
@@ -58,10 +55,22 @@ void ilim(ifstream &inp) {
         sval.set_str(s, 10);
         assert(sval >= 0); // x >= 0
         sum_prod(solv, At[i], sval);
+
+        expected -= c[i] * sval;
     }
 
     for(int i = 0; i < n; i++)
         assert(solv[i] <= b[i]); // Ax <= b
+
+    if (check_expected)
+        assert(expected == 0); // solucao tem valor otimo falado
+}
+
+void ilim(ifstream &inp) {
+    mpq_class fc = 0;
+    vector<mpq_class> result(m, 0);
+
+    checksol(inp, fc, false);
 
     for (int i = 0; i < m; i++)
     {
@@ -81,7 +90,30 @@ void ilim(ifstream &inp) {
 }
 
 void otim(ifstream &inp) {
-    
+    mpq_class optv, optvcopy;
+    string s;
+    inp >> s;
+    optv.set_str(s, 10);
+    optvcopy.set_str(s, 10);
+
+    checksol(inp, optvcopy, true);
+
+    vector<mpq_class> result(m, 0);
+    mpq_class tot = 0;
+    for (int i = 0; i < n; i++) {
+        mpq_class cval;
+        inp >> s;
+        cval.set_str(s, 10);
+        sum_prod(result, A[i], cval);
+        tot += cval * b[i];
+
+        assert(cval >= 0); // yt >= 0
+    }
+
+    for (int i = 0; i < m; i++)
+        assert(result[i] >= c[i]);//ytA >= ct
+
+    assert(tot == optv);// ytb == ctz
 }
 
 

@@ -70,7 +70,7 @@ Solution::Solution(Tableau &t, Tableau &auxt, Solution &aux_sol, bool as_rationa
     // std::cout << std::endl;
     // t.print_tab();
 
-    assert(aux_sol.sol.size() == t.m + t.n);
+    assert((int)aux_sol.sol.size() == t.m + t.n);
     for (int i = 0; i < t.n; i++)
     {
         // std::cout << aux_sol.sol[t.m + i].get_str() << std::endl;
@@ -79,7 +79,7 @@ Solution::Solution(Tableau &t, Tableau &auxt, Solution &aux_sol, bool as_rationa
 
     // std::vector<int> out_of_basis;
 
-    assert(aux_sol.basis.size() == t.n);
+    assert((int)aux_sol.basis.size() == t.n);
     for (int i = 0; i < t.n; i++)
     {
         assert(aux_sol.basis[i] >= 0);
@@ -147,7 +147,7 @@ bool Solution::is_zero()
 void Solution::print_inv_cert(std::ostream &out)
 {
     assert(this->cert[0].size() == this->basis.size());
-    for (int i = 0; i < this->cert[0].size() - 1; i++)
+    for (int i = 0; i < (int)this->cert[0].size() - 1; i++)
         if (!this->as_rational)
             out << this->cert[0][i].get_d() << " ";
         else
@@ -172,7 +172,7 @@ std::ostream &operator<<(std::ostream &out, Solution &s)
                 << s.solval.get_str() << std::endl;
     }
 
-    for (int i = 0; i < s.sol.size() - 1; i++)
+    for (int i = 0; i < (int)s.sol.size() - 1; i++)
         if (!s.as_rational)
             out << s.sol[i].get_d() << " ";
         else
@@ -183,7 +183,7 @@ std::ostream &operator<<(std::ostream &out, Solution &s)
     else
         out << s.sol[s.sol.size() - 1].get_str() << std::endl;
 
-    for (int i = 0; i < s.cert[0].size() - 1; i++)
+    for (int i = 0; i < (int)s.cert[0].size() - 1; i++)
         if (!s.as_rational)
             out << s.cert[0][i].get_d() << " ";
         else
@@ -266,7 +266,7 @@ void Solution::solve(Tableau &t, bool is_aux)
             }
             if (maxii != -1) // maxii is r, k is j, at the pseudocode we saw in class
             {
-                assert(this->basis.size() == t.n);
+                assert((int)this->basis.size() == t.n);
                 // now we remove the maxii'th identity column and add column j.
                 for (int i = 0; i < t.n; i++)
                 {
@@ -296,7 +296,7 @@ void Solution::solve(Tableau &t, bool is_aux)
 
 void Solution::canon(Tableau &t)
 {
-    assert(this->basis.size() == t.n);
+    assert((int)this->basis.size() == t.n);
     std::vector<bool> marc(t.n,false);
     bool entrou = true;
     while(entrou) {
@@ -332,8 +332,8 @@ void Solution::ilim(int negvar, Tableau &t)
     for (int i = 0; i < t.m; i++)
         infcert[i] = 0;
 
-    assert(infcert.size() == t.m);
-    for (int i = 0; i < this->basis.size(); i++)
+    assert((int)infcert.size() == t.m);
+    for (int i = 0; i < (int)this->basis.size(); i++)
         infcert[this->basis[i]] = -t.tab[i + 1][negvar];
 
     assert(infcert[negvar] <= 0);
@@ -346,7 +346,7 @@ void Solution::ilim(int negvar, Tableau &t)
 void Solution::optim(Tableau &t, bool is_aux)
 {
     if (is_aux && this->solval == 0) {
-        assert(this->basis.size() == t.n);
+        assert((int)this->basis.size() == t.n);
         bool entrou = true;
         while (entrou){
             entrou = false;
@@ -441,7 +441,7 @@ void Solution::optim(Tableau &t, bool is_aux)
     this->solval = -this->solval;
     assert(this->cert.size());
     assert(this->cert[0].size());
-    for (int i = 0; i < this->cert[0].size(); i++)
+    for (int i = 0; i < (int)this->cert[0].size(); i++)
         this->cert[0][i] = -this->cert[0][i] * (1 - 2 * t.invs[i + 1]);
     // std::cout << "Cert: " << std::endl;
     // for(int i = 0; i < this->cert[0].size(); i++)
@@ -451,10 +451,10 @@ void Solution::optim(Tableau &t, bool is_aux)
     //     std::cout << t.rems[i] << std::endl;
 
     this->cert[0].resize(this->cert[0].size() + t.rems.size());
-    for (int i = 0; i < t.rems.size(); i++)
+    for (int i = 0; i < (int)t.rems.size(); i++)
     {
         // rems values are "1-based"
-        for (int j = t.rems[i]; j < this->cert[0].size(); j++)
+        for (int j = t.rems[i]; j < (int)this->cert[0].size(); j++)
             this->cert[0][j] = this->cert[0][j - 1];
         this->cert[0][t.rems[i] - 1] = 0;
     }
