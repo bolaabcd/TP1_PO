@@ -10,7 +10,7 @@ class Solution
 {
     public:
         Solution(Tableau &t, bool as_rational2);
-        Solution(Tableau &t, Solution &aux_sol, bool as_rational2);
+        Solution(Tableau &t, Tableau &auxt, Solution &aux_sol, bool as_rational2);
         bool is_zero();
         void print_inv_cert(std::ostream &out);
         friend std::ostream &operator<<(std::ostream &out, Solution &s);

@@ -312,6 +312,11 @@ bool Tableau::rem_extra(std::ostream &out, bool as_rational)
     // return true;
 }
 
+// void Tableau::mul(std::vector<mpq_class> &vec, std::vector<std::vector<mpq_class>> &mat) {
+//     assert(mat.size() - 1 == mat[0].size()); // ignore the first line
+
+// }
+
 Tableau::~Tableau()
 {
     this->n = -1;

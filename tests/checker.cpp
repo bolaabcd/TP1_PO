@@ -13,7 +13,7 @@ const int INF = 0x3f3f3f3f;
 const ll LINF = 0x3f3f3f3f3f3f3f3fll;
 
 vector<mpq_class> c, b;
-vector<vector<mpq_class>> A;
+vector<vector<mpq_class>> A, At;
 
 int n, m;
 
@@ -47,11 +47,28 @@ void invi(ifstream &inp) {
 }
 
 void ilim(ifstream &inp) {
+    mpq_class fc = 0;
+    vector<mpq_class> result(m, 0);
 
+    for (int i = 0; i < m; i++)
+    {
+        mpq_class cval;
+        string s;
+        inp >> s;
+        cval.set_str(s, 10);
+        sum_prod(result,At[i], cval);
+
+        assert(cval >= 0);
+        fc += cval * c[i];
+    }
+
+    assert(fc > 0);
+    for (mpq_class &i : result)
+        assert(i == 0);
 }
 
 void otim(ifstream &inp) {
-
+    
 }
 
 
@@ -63,6 +80,7 @@ int main(int argc, char **argv)
     c.resize(m);
     b.resize(n);
     A.resize(n, vector<mpq_class>(m + n, 0));
+    At.resize(m + n, vector<mpq_class>(n));
 
     for (int i = 0; i < m; i++)
     {
@@ -82,6 +100,7 @@ int main(int argc, char **argv)
                 string s;
                 in >> s;
                 A[i][j].set_str(s, 10);
+                At[j][i].set_str(s,10);
             }
 
     for (int i = 0; i < n; i ++)
